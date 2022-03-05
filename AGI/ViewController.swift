@@ -45,7 +45,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
     @IBOutlet weak var picturesTableView: NSTableView!
     
     // Rendering
-    let width = 160
+    let width = 320
     let height = 200
     var buffer: [Pixel] = []
     

@@ -72,12 +72,6 @@ class Picture {
         self.data = NSData.init(data: data as Data)
     }
     
-    func arrayPos(x: UInt8, y: UInt8) -> Int {
-        guard x < 160 && y < 200 && x >= 0 && y >= 0 else { return 0 }
-        
-        return (Int(y) * 160) + Int(x)
-    }
-    
     func getNextByte() -> UInt8 {
         prevByte = byteBuffer
         
@@ -110,6 +104,30 @@ class Picture {
         }
         
         return PictureAction.endOfPicture.rawValue
+    }
+    
+    func arrayPos(_ x: Int, _ y: Int) -> Int {
+        guard x < 320 && y < 200 && x >= 0 && y >= 0 else { return 0 }
+        
+        return (Int(y) * 320) + Int(x)
+    }
+    
+    func drawPixel(to buffer: inout [Pixel], x: UInt8, y: UInt8) {
+        drawPixel(to: &buffer, x: Int(x), y: Int(y))
+    }
+    
+    // All drawing coordinates are for 160x200, we need to stretch every pixel 2x wide
+    func drawPixel(to buffer: inout [Pixel], x: Int, y: Int) {
+        buffer[arrayPos(x * 2, y)] = currentColor
+        buffer[arrayPos((x * 2) + 1, y)] = currentColor
+    }
+    
+    func getPixel(from buffer: [Pixel], x: UInt8, y: UInt8) -> Pixel {
+        getPixel(from: buffer, x: Int(x), y: Int(y))
+    }
+    
+    func getPixel(from buffer: [Pixel], x: Int, y: Int) -> Pixel {
+        return buffer[arrayPos(x * 2, y)]
     }
     
     func drawToBuffer(buffer: inout [Pixel]) {

@@ -64,7 +64,7 @@ extension Picture {
                                 
                                 // Plot within bounds
                                 if penX >= 0 && penY >= 0 && penX < 160 && penY < 200 {
-                                    buffer[arrayPos(x: UInt8(penX), y: UInt8(penY))] = currentColor
+                                    drawPixel(to: &buffer, x: UInt8(penX), y: UInt8(penY))
                                 }
                             }
                         }

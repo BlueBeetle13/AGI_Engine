@@ -133,13 +133,14 @@ extension Picture {
             
             var x = Double(startX)
             while (UInt8(x) != endX) {
-                buffer[arrayPos(x: round(number: x, direction: addX),
-                                y: round(number: y, direction: addY))] = currentColor
+                drawPixel(to: &buffer,
+                          x: round(number: x, direction: addX),
+                          y: round(number: y, direction: addY))
                 x += addX
                 y += addY
             }
             
-            buffer[arrayPos(x: endX, y: endY)] = currentColor
+            drawPixel(to: &buffer, x: endX, y: endY)
         }
         else {
             var x = Double(startX);
@@ -147,13 +148,14 @@ extension Picture {
             
             var y = Double(startY)
             while (UInt8(y) != endY) {
-                buffer[arrayPos(x: round(number: x, direction: addX),
-                                y: round(number: y, direction: addY))] = currentColor
+                drawPixel(to: &buffer,
+                          x: round(number: x, direction: addX),
+                          y: round(number: y, direction: addY))
                 x += addX
                 y += addY
             }
             
-            buffer[arrayPos(x: endX, y: endY)] = currentColor
+            drawPixel(to: &buffer, x: endX, y: endY)
         }
     }
 }
