@@ -82,7 +82,14 @@ extension Picture {
             startY = getNextByte()
         }
         
-        while (peekNextByte() < 0xF0) {
+        // Special case - only 1 pixel, no other data
+        guard peekNextByte() < 0xF0 else {
+            drawPixel(to: &buffer, x: UInt8(startX), y: UInt8(startY))
+            return
+        }
+        
+        // Keep drawing lines as long as we are getting displacements
+        while peekNextByte() < 0xF0 {
             
             let displacement = getNextByte()
             
@@ -115,7 +122,7 @@ extension Picture {
             let ceil = number.rounded(.up)
             
             if direction < 0 {
-                return (number - floor <= 0.51) ? UInt8(floor) : UInt8(ceil)
+                return (number - floor <= 0.501) ? UInt8(floor) : UInt8(ceil)
             }
             
             return (number - floor < 0.499) ? UInt8(floor) : UInt8(ceil)

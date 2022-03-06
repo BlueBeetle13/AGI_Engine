@@ -41,14 +41,13 @@ extension Picture {
         
         func addToFillQueue(_ posX: UInt8, _ posY: UInt8) {
             
-            if getPixel(from: buffer, x: posX, y: posY) == backgroundColor &&
-                backgroundColor != currentColor {
+            let pixelColor = getPixel(from: buffer, x: posX, y: posY)
+            if pixelColor != currentColor && pixelColor == palette[15] {
                 fillQueue.append(FillPosition(posX, posY))
             }
         }
         
         var fillQueue: [FillPosition] = []
-        let backgroundColor = getPixel(from: buffer, x: posX, y: posY)
         
         // Get the starting position and add to the queue
         addToFillQueue(posX, posY)

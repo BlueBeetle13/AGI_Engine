@@ -55,6 +55,7 @@ class Picture {
     
     let id: Int
     var isDrawingPicture = false
+    var isDrawingPriority = false
     var currentColor = Pixel(a: 255, r: 0, g: 0, b: 0)
     var currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
     let penSizes = PenSizes()
@@ -135,13 +136,15 @@ class Picture {
         byteBuffer = 0
         prevByte = 0
         isDrawingPicture = false
+        isDrawingPriority = false
         currentColor = palette[0]
         currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
         isVersion3BitShifting = false
         
         while dataPosition < data.length {
 
-            if let pictureAction = PictureAction(rawValue: getNextByte()) {
+            let byte = getNextByte()
+            if let pictureAction = PictureAction(rawValue: byte) {
                 
                 // Get the picture action
                 switch pictureAction {
@@ -155,7 +158,7 @@ class Picture {
                     changePictureColorEnablePriorityDraw()
                     
                 case PictureAction.disablePriorityDraw:
-                    debug("Disable Priority Draw")
+                    disablePriorityDraw()
                     
                 case PictureAction.drawYCorner:
                     drawCornerLine(isYDirection: true, buffer: &buffer)
@@ -181,6 +184,8 @@ class Picture {
                 case PictureAction.endOfPicture:
                     debug("End of Picture: \(dataPosition)")
                 }
+            } else {
+                print("Unknown Picture Action: \(byte)")
             }
         }
     }
@@ -209,6 +214,7 @@ class Picture {
     }
     
     private func changePictureColorEnablePriorityDraw() {
+        isDrawingPriority = true
         
         var colorNum: Int = 0
         
@@ -228,5 +234,10 @@ class Picture {
     private func disablePictureDraw() {
         debug("Disable Picture Draw")
         isDrawingPicture = false
+    }
+    
+    private func disablePriorityDraw() {
+        debug("Disable Priority Draw")
+        isDrawingPriority = false
     }
 }
