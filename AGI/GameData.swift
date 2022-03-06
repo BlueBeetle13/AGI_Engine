@@ -13,6 +13,7 @@ class GameData {
         case pictures = "picdir"
         case view = "viewdir"
         case volume = "vol"
+        case words = "words.tok"
         case mh2dir = "mh2dir"
         case mhdir = "mhdir"
         case grdir = "grdir"
@@ -24,6 +25,7 @@ class GameData {
     private var viewDirectory: Directory?
     private let volumes = Volume()
     private var pictures: [Int: Picture] = [:]
+    private var words: [Word] = []
     private var redrawLambda: (() -> Void)? = nil
     
     func loadGameData(from path: String,
@@ -36,6 +38,7 @@ class GameData {
             viewDirectory = nil
             volumes.clear()
             pictures.removeAll()
+            words.removeAll()
             redrawLambda = redraw
             
             let fileList = try FileManager.default.contentsOfDirectory(atPath: path)
@@ -52,11 +55,15 @@ class GameData {
                 
                 // Pictures Directory
                 case FileName.pictures.rawValue:
-                    picturesDirectory = loadDirectoryData("\(path)/\(file)")
+                    picturesDirectory = loadDirectoryData(from: "\(path)/\(file)")
                     
                 // View Directory
                 case FileName.view.rawValue:
-                    viewDirectory = loadDirectoryData("\(path)/\(file)")
+                    viewDirectory = loadDirectoryData(from: "\(path)/\(file)")
+                    
+                // Words
+                case FileName.words.rawValue:
+                    words = Words.fetchWords(from: "\(path)/\(file)")
                     
                 // Not individual file
                 default:
@@ -105,39 +112,21 @@ class GameData {
             
             var dataPosition = 0
             
-            func getNextByte() -> UInt8 {
-                var byteBuffer: UInt8 = 0
-                
-                if dataPosition < data.length {
-                    data.getBytes(&byteBuffer, range: NSRange(location: dataPosition, length: 1))
-                    dataPosition += 1
-                    
-                    return byteBuffer
-                }
-                
-                return 0
-            }
-            
-            func getOffset() -> Int {
-                let low = Int(getNextByte())
-                let high = Int(getNextByte())
-                return ((high << 8) + low)
-            }
-            
             // This file must begin with 0x0800
-            guard getNextByte() == 0x08, getNextByte() == 0x00 else { return }
+            guard Utils.getNextByte(at: &dataPosition, from: data) == 0x08,
+                  Utils.getNextByte(at: &dataPosition, from: data) == 0x00 else { return }
             
             agiVersion = 3
             
-            let logDirectory = getOffset()
-            let picDirectory = getOffset()
+            let logDirectory = Utils.getWord(at: &dataPosition, from: data)
+            let picDirectory = Utils.getWord(at: &dataPosition, from: data)
             
             let picData = data.subdata(with: NSRange(location: logDirectory, length:  picDirectory - logDirectory))
             picturesDirectory = Directory(picData as NSData)
         }
     }
     
-    private func loadDirectoryData(_ path: String) -> Directory? {
+    private func loadDirectoryData(from path: String) -> Directory? {
         return Directory(path)
     }
     

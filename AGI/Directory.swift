@@ -14,10 +14,6 @@ struct DirectoryItem {
     init(byte1: UInt8, byte2: UInt8, byte3: UInt8) {
         volumeNumber = byte1 >> 4
         position = (UInt32(byte1 & 0x0F) << 16) + (UInt32(byte2) << 8) + UInt32(byte3)
-        /*print("B1: \(String(format: "%02X", byte1 >> 4)) -- \(String(format: "%02X", byte1 & 0x0f))")
-        print("\(String(format: "%02X", byte1)) - \(String(format: "%02X", byte2)) - \(String(format: "%02X", byte3))")
-        print("V: \(volumeNumber), P: \(position)")
-        print("\(byte1 >> 4) - \(UInt32((byte1 & 0x0F)) << 16) - \(UInt32(byte2) << 8) - \(UInt32(byte3))")*/
     }
 }
 
