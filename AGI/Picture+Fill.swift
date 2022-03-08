@@ -10,7 +10,7 @@ import Foundation
 extension Picture {
     
     func fill(buffer: inout [Pixel]) {
-        debug("Fill")
+        Utils.debug("Fill")
 
         while (peekNextByte() < 0xF0) {
             

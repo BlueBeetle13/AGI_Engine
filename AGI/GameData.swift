@@ -13,12 +13,10 @@ class GameData {
         case pictures = "picdir"
         case view = "viewdir"
         case volume = "vol"
+        case objects = "object"
         case words = "words.tok"
-        case mh2dir = "mh2dir"
-        case mhdir = "mhdir"
-        case grdir = "grdir"
-        case kq4dir = "kq4dir"
     }
+    let allFilesDirectories = ["mh2dir", "mhdir", "grdir", "kq4dir"]
     
     private var agiVersion = 2
     private var picturesDirectory: Directory?
@@ -26,6 +24,7 @@ class GameData {
     private let volumes = Volume()
     private var pictures: [Int: Picture] = [:]
     private var words: [Word] = []
+    private var objects: [Object] = []
     private var redrawLambda: (() -> Void)? = nil
     
     func loadGameData(from path: String,
@@ -46,13 +45,6 @@ class GameData {
             for file in fileList {
                 switch file.lowercased() {
                 
-                // All Directories file
-                case FileName.mh2dir.rawValue,
-                     FileName.mhdir.rawValue,
-                     FileName.grdir.rawValue,
-                     FileName.kq4dir.rawValue:
-                    loadAllFilesDirectoryData("\(path)/\(file)")
-                
                 // Pictures Directory
                 case FileName.pictures.rawValue:
                     picturesDirectory = loadDirectoryData(from: "\(path)/\(file)")
@@ -65,26 +57,33 @@ class GameData {
                 case FileName.words.rawValue:
                     words = Words.fetchWords(from: "\(path)/\(file)")
                     
-                // Not individual file
+                // Objects
+                case FileName.objects.rawValue:
+                    objects = Objects.fetchObjects(from: "\(path)/\(file)")
+                    
+                // Multiple files
                 default:
                     
                     let fileParts = file.lowercased().split(separator: ".")
                     
-                    // Volume
-                    if fileParts.first?.hasSuffix( FileName.volume.rawValue) ?? false,
-                       let ext = fileParts.last {
-                        print("Volume: \(file)")
+                    // Volumes
+                    if fileParts.first?.hasSuffix(FileName.volume.rawValue) ?? false, let ext = fileParts.last {
                         volumes.addFile(String(ext), "\(path)/\(file)")
+                    }
+                    
+                    // All files directory
+                    else if allFilesDirectories.contains(file.lowercased()) {
+                        loadAllFilesDirectoryData("\(path)/\(file)")
                     }
                     
                     // Unknown
                     else {
-                        print("Uknown file: \(file)")
+                        Utils.debug("Uknown file: \(file)")
                     }
                 }
             }
     
-        } catch { print("Error getting file list: \(error)")}
+        } catch { Utils.debug("Error getting file list: \(error)")}
         
         // Now that we have read in all the files, populate the data structures
         
@@ -98,7 +97,6 @@ class GameData {
     func loadPicture(id: Int, buffer: inout [Pixel]) {
         if let picture = pictures[id] {
             
-            print("Draw....")
             picture.drawToBuffer(buffer: &buffer)
             
             redrawLambda?()
@@ -118,8 +116,8 @@ class GameData {
             
             agiVersion = 3
             
-            let logDirectory = Utils.getWord(at: &dataPosition, from: data)
-            let picDirectory = Utils.getWord(at: &dataPosition, from: data)
+            let logDirectory = Utils.getNextWord(at: &dataPosition, from: data)
+            let picDirectory = Utils.getNextWord(at: &dataPosition, from: data)
             
             let picData = data.subdata(with: NSRange(location: logDirectory, length:  picDirectory - logDirectory))
             picturesDirectory = Directory(picData as NSData)
@@ -132,16 +130,18 @@ class GameData {
     
     private func loadPictureData() {
         
-        for pos in 0...(picturesDirectory?.items.count ?? 0) {
-            if let directoryItem = picturesDirectory?.items[pos] {
-                
-                print("Picture \(pos): \(directoryItem.volumeNumber), \(directoryItem.position)")
-                if let pictureData = volumes.getData(version: agiVersion,
-                                                     volumeNumber: directoryItem.volumeNumber,
-                                                     position: directoryItem.position) {
+        if let items = picturesDirectory?.items {
+            for pos in 0..<items.count {
+                if let directoryItem = items[pos] {
                     
-                    print("Picture \(pos) data: \(pictureData.length)")
-                    pictures[pos] = Picture(with: pictureData, id: pos, version: agiVersion)
+                    Utils.debug("Picture \(pos): \(directoryItem.volumeNumber), \(directoryItem.position)")
+                    if let pictureData = volumes.getData(version: agiVersion,
+                                                         volumeNumber: directoryItem.volumeNumber,
+                                                         position: directoryItem.position) {
+                        
+                        Utils.debug("Picture \(pos) data: \(pictureData.length)")
+                        pictures[pos] = Picture(with: pictureData, id: pos, version: agiVersion)
+                    }
                 }
             }
         }

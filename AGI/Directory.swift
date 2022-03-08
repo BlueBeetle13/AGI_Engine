@@ -25,7 +25,7 @@ class Directory {
         
         // Load the file at the path as NSData
         if let data = NSData(contentsOfFile: path) {
-            print("Directory: \(path) Total Items: \(data.length / 3)")
+            Utils.debug("Directory: \(path) Total Items: \(data.length / 3)")
                         
             getDirectoryItems(from: data)
         }
@@ -37,12 +37,12 @@ class Directory {
     
     private func getDirectoryItems(from data: NSData) {
         
-        print("Directory - Total Items: \(data.length / 3)")
+        Utils.debug("Directory - Total Items: \(data.length / 3)")
         
         let bytes: [UInt8] = data.map { $0 }
         
         var index: Int = 0
-        for itemNum in 0...((data.length / 3) - 1) {
+        for itemNum in 0..<(data.length / 3) {
             let byte1 = bytes[index]
             let byte2 = bytes[index + 1]
             let byte3 = bytes[index + 2]
@@ -51,7 +51,7 @@ class Directory {
                 items[itemNum] = DirectoryItem(byte1: byte1, byte2: byte2, byte3: byte3)
             }
             
-            //print("DirectoryItem: \(itemNum): \(items[itemNum])")
+            Utils.debug("DirectoryItem: \(itemNum): \(items[itemNum])")
             
             index += 3
         }

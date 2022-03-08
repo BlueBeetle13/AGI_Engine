@@ -23,7 +23,7 @@ class Words {
         var words: [Word] = []
         
         if let data = NSData(contentsOfFile: path) {
-            print("Words: \(path) Total Size: \(data.length)")
+            Utils.debug("Words: \(path) Total Size: \(data.length)")
             
             // The start of the file is the offsets for each letter, this isn't needed to extract the words, so skip
             var dataPosition: Int = 26 * 2
@@ -32,7 +32,7 @@ class Words {
             var letters: String = ""
             
             // Start fetching characters until we fine the end of file word
-            while dataPosition < data.count {
+            while dataPosition < data.length {
                 
                 var letterPos = 0
                 
@@ -62,11 +62,6 @@ class Words {
                 previousWord = text
                 letters = ""
             }
-        }
-        
-        print("Words: \(words.count)\n\n")
-        for word in words {
-            print("\(word)")
         }
         
         return words

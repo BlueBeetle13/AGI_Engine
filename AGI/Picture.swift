@@ -10,9 +10,6 @@ import AppKit
 
 class Picture {
     
-    //func debug(_ message: String) { print(message) }
-    func debug(_ message: String) { }
-    
     enum PaletteColor: Int {
         case black = 0
         case white = 15
@@ -182,10 +179,10 @@ class Picture {
                     plotWithPen(buffer: &buffer)
                     
                 case PictureAction.endOfPicture:
-                    debug("End of Picture: \(dataPosition)")
+                    Utils.debug("End of Picture: \(dataPosition)")
                 }
             } else {
-                print("Unknown Picture Action: \(byte)")
+                Utils.debug("Unknown Picture Action: \(byte)")
             }
         }
     }
@@ -210,7 +207,7 @@ class Picture {
             currentColor = palette[colorNum]
         }
         
-        debug("Enable Picture Draw: \(colorNum) \(currentColor)")
+        Utils.debug("Enable Picture Draw: \(colorNum) \(currentColor)")
     }
     
     private func changePictureColorEnablePriorityDraw() {
@@ -228,16 +225,16 @@ class Picture {
             colorNum = Int(getNextByte())
         }
         
-        debug("Enable Priority Draw: \(colorNum) \(currentColor)")
+        Utils.debug("Enable Priority Draw: \(colorNum) \(currentColor)")
     }
     
     private func disablePictureDraw() {
-        debug("Disable Picture Draw")
+        Utils.debug("Disable Picture Draw")
         isDrawingPicture = false
     }
     
     private func disablePriorityDraw() {
-        debug("Disable Priority Draw")
+        Utils.debug("Disable Priority Draw")
         isDrawingPriority = false
     }
 }

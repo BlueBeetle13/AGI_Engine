@@ -22,11 +22,11 @@ extension Picture {
                                  isRectangle: (penInfo & 0x10) != 0,
                                  penSize: penInfo & 0x07)
         
-        debug("Change Pen Size and Style: \(currentPenType)")
+        Utils.debug("Change Pen Size and Style: \(currentPenType)")
     }
     
     func plotWithPen(buffer: inout [Pixel]) {
-        debug("Plot With Pen")
+        Utils.debug("Plot With Pen")
         
         let penSize = Int(currentPenType.penSize)
         let penShape = currentPenType.isRectangle ? penSizes.rectanglePens : penSizes.ciclePens

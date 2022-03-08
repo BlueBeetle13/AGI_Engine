@@ -10,7 +10,7 @@ import Foundation
 extension Picture {
     
     func drawCornerLine(isYDirection: Bool, buffer: inout [Pixel]) {
-        debug("Draw Y Corner")
+        Utils.debug("Draw Y Corner")
         
         var startX: UInt8 = 0
         var startY: UInt8 = 0
@@ -45,7 +45,7 @@ extension Picture {
     }
     
     func drawAbsoluteLine(buffer: inout [Pixel]) {
-        debug("Draw Absolute Line")
+        Utils.debug("Draw Absolute Line")
         
         var startX: UInt8 = 0
         var startY: UInt8 = 0
@@ -71,7 +71,7 @@ extension Picture {
     }
     
     func drawRelativeLine(buffer: inout [Pixel]) {
-        debug("Draw Relative Line")
+        Utils.debug("Draw Relative Line")
         
         var startX: UInt8 = 0
         var startY: UInt8 = 0
@@ -114,7 +114,7 @@ extension Picture {
     }
     
     private func drawLine(_ buffer: inout [Pixel], _ startX: UInt8, _ startY: UInt8, _ endX: UInt8, _ endY: UInt8) {
-        debug("Draw Line: \(startX),\(startY) -> \(endX),\(endY)")
+        Utils.debug("Draw Line: \(startX),\(startY) -> \(endX),\(endY)")
         
         func round(number: Double, direction: Double) -> UInt8 {
             

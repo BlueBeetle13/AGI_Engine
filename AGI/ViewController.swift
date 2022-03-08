@@ -104,7 +104,6 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                                         // Redraw image
                                         DispatchQueue.main.async {
                                             if let image = NSImage.init(pixels: self.buffer, width: self.width, height: self.height)  {
-                                                print("Draw")
                                                 self.screenView.image = image
                                             }
                                         }
