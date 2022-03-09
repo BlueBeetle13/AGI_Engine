@@ -18,33 +18,28 @@ extension Picture {
             let posY = getNextByte()
    
             if isDrawingPicture {
-                floodFill(&buffer, posX, posY)
+                floodFill(&buffer, Int(posX), Int(posY))
             }
         }
     }
     
-    private func floodFill(_ buffer: inout [Pixel], _ posX: UInt8, _ posY: UInt8) {
+    private func floodFill(_ buffer: inout [Pixel], _ posX: Int, _ posY: Int) {
         
-        struct FillPosition: Equatable {
-            let posX: UInt8
-            let posY: UInt8
-            
-            init(_ posX: UInt8, _ posY: UInt8) {
-                self.posX = posX
-                self.posY = posY
-            }
-            
-            public static func == (lhs: FillPosition, rhs: FillPosition) -> Bool {
-                return lhs.posX == rhs.posX && lhs.posY == rhs.posY
-            }
+        struct FillPosition {
+            let posX: Int
+            let posY: Int
         }
         
-        func addToFillQueue(_ posX: UInt8, _ posY: UInt8) {
+        func isPixelDrawable(_ posX: Int, _ posY: Int) -> Bool {
+            
+            guard posX >= 0, posX < 160, posY >= 0, posY < 200 - 32 else { return false }
             
             let pixelColor = getPixel(from: buffer, x: posX, y: posY)
-            if pixelColor != currentColor && pixelColor == palette[15] {
-                fillQueue.append(FillPosition(posX, posY))
-            }
+            return (currentColor != palette[15] && pixelColor == palette[15])
+        }
+        
+        func addToFillQueue(_ posX: Int, _ posY: Int) {
+            fillQueue.append(FillPosition(posX: posX, posY: posY))
         }
         
         var fillQueue: [FillPosition] = []
@@ -55,30 +50,45 @@ extension Picture {
         while !fillQueue.isEmpty {
             
             let lastItem = fillQueue.removeLast()
-            let posX = lastItem.posX
-            let posY = lastItem.posY
+            var posX = Int(lastItem.posX)
+            let posY = Int(lastItem.posY)
             
-            // Color the current pixel
-            drawPixel(to: &buffer, x: posX, y: posY)
-            
-            // If the pixel to the left is white, add to the queue
-            if posX > 0 {
-                addToFillQueue(posX - 1, posY)
+            // This pixel myst have been updated already
+            if !isPixelDrawable(posX, posY) {
+                continue
             }
             
-            // If the pixel to the right is white, add to the queue
-            if posX < 160 - 1 {
-                addToFillQueue(posX + 1, posY)
+            // Find the left most pixel on this line
+            while isPixelDrawable(posX - 1, posY) {
+                posX -= 1
             }
             
-            // If the pixel to the top is white, add to the queue
-            if posY > 0 {
-                addToFillQueue(posX, posY - 1)
-            }
+            // Move to the right while we can draw and add every other pixel above and below to the queue
+            var isCheckingUp = true
+            var isCheckingDown = true
             
-            // If the pixel to the top is white, add to the queue
-            if posY < 200 - 1 - 32 {
-                addToFillQueue(posX, posY + 1)
+            while isPixelDrawable(posX, posY) {
+                drawPixel(to: &buffer, x: posX, y: posY)
+                
+                if isPixelDrawable(posX, posY - 1) {
+                    if isCheckingUp {
+                        addToFillQueue(posX, posY - 1)
+                        isCheckingUp = false
+                    }
+                } else {
+                    isCheckingUp = true
+                }
+                
+                if isPixelDrawable(posX, posY + 1) {
+                    if isCheckingDown {
+                        addToFillQueue(posX, posY + 1)
+                        isCheckingDown = false
+                    }
+                } else {
+                    isCheckingDown = true
+                }
+                
+                posX += 1
             }
         }
     }

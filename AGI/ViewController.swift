@@ -48,6 +48,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
     let width = 320
     let height = 200
     var buffer: [Pixel] = []
+    var renderStartTime: TimeInterval = 0
     
     let gameData = GameData()
     var pictures: [Picture] = []
@@ -101,10 +102,14 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                                       },
                                       redraw: {
                                         
+                                        print("Time1: \(Date().timeIntervalSince1970 - self.renderStartTime)")
+                                        
                                         // Redraw image
                                         DispatchQueue.main.async {
                                             if let image = NSImage.init(pixels: self.buffer, width: self.width, height: self.height)  {
                                                 self.screenView.image = image
+                                                
+                                                print("Time2: \(Date().timeIntervalSince1970 - self.renderStartTime)")
                                             }
                                         }
                                       })
@@ -130,6 +135,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
     func tableViewSelectionDidChange(_ notification: Notification) {
         print("Selected: \(pictures[picturesTableView.selectedRow].id)")
         
+        renderStartTime = Date().timeIntervalSince1970
         buffer = Array(repeating: Pixel(a: 255, r: 255, g: 255, b: 255), count: width * height)
         
         gameData.loadPicture(id: pictures[picturesTableView.selectedRow].id, buffer: &buffer)
