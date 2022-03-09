@@ -51,7 +51,9 @@ class Directory {
                 items[itemNum] = DirectoryItem(byte1: byte1, byte2: byte2, byte3: byte3)
             }
             
-            Utils.debug("DirectoryItem: \(itemNum): \(items[itemNum])")
+            if let item = items[itemNum] {
+                Utils.debug("DirectoryItem: \(itemNum): \(item)")
+            }
             
             index += 3
         }

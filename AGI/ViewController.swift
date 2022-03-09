@@ -17,17 +17,15 @@ public struct Pixel: Equatable {
 }
 
 extension NSImage {
-    convenience init?(pixels: [Pixel], width: Int, height: Int) {
-        guard width > 0 && height > 0, pixels.count == width * height else { return nil }
-        var data = pixels
-        guard let providerRef = CGDataProvider(data: Data(bytes: &data, count: data.count * MemoryLayout<Pixel>.size) as CFData)
+    convenience init?(pixels: UnsafeRawPointer, width: Int, height: Int) {
+        guard let providerRef = CGDataProvider(data: Data(bytes: pixels, count: 320 * 200 * 4) as CFData)
             else { return nil }
         guard let cgim = CGImage(
             width: width,
             height: height,
             bitsPerComponent: 8,
             bitsPerPixel: 32,
-            bytesPerRow: width * MemoryLayout<Pixel>.size,
+            bytesPerRow: width * 4,
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue),
             provider: providerRef,
@@ -42,29 +40,18 @@ extension NSImage {
 class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate {
     
     @IBOutlet weak var screenView: NSImageView!
+    @IBOutlet weak var priorityView: NSImageView!
     @IBOutlet weak var picturesTableView: NSTableView!
-    
-    // Rendering
-    let width = 320
-    let height = 200
-    var buffer: [Pixel] = []
     
     let gameData = GameData()
     var pictures: [Picture] = []
+    var startTime: TimeInterval = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        buffer = Array.init(repeating: Pixel(a: 255, r: 255, g: 255, b: 255), count: width * height)
-        
-        if let image = NSImage.init(pixels: buffer, width: width, height: height)  {
-            screenView.image = image
-        }
-        
         picturesTableView.dataSource = self
         picturesTableView.delegate = self
-
-        //gameData.loadGameData(from: "/Users/typhoonsoftware/Downloads/spacequestiivohaulsrevenge1987/sq2/")
     }
 
     override var representedObject: Any? {
@@ -88,7 +75,6 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                 print("Folder: \(path)")
                 
                 gameData.loadGameData(from: path,
-                                      with: &buffer,
                                       loadFinished: { pictures in
                                         self.pictures = Array(pictures.values).sorted(by: { $0.id < $1.id })
                                         
@@ -101,11 +87,26 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                                       },
                                       redraw: {
                                         
+                                        print("Time1: \(Date().timeIntervalSince1970 - self.startTime)")
+                                        
                                         // Redraw image
                                         DispatchQueue.main.async {
-                                            if let image = NSImage.init(pixels: self.buffer, width: self.width, height: self.height)  {
+                                            
+                                            // Screen
+                                            if let image = NSImage.init(pixels: self.gameData.bitfield,
+                                                                        width: self.gameData.width,
+                                                                        height: self.gameData.height)  {
                                                 self.screenView.image = image
+                                                
+                                                print("Time2: \(Date().timeIntervalSince1970 - self.startTime)")
                                             }
+                                            
+                                            // Priority
+                                            /*if let image = NSImage.init(pixels: self.gameData.priorityBuffer,
+                                                                        width: self.gameData.width,
+                                                                        height: self.gameData.height)  {
+                                                self.priorityView.image = image
+                                            }*/
                                         }
                                       })
             }
@@ -130,9 +131,8 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
     func tableViewSelectionDidChange(_ notification: Notification) {
         print("Selected: \(pictures[picturesTableView.selectedRow].id)")
         
-        buffer = Array(repeating: Pixel(a: 255, r: 255, g: 255, b: 255), count: width * height)
-        
-        gameData.loadPicture(id: pictures[picturesTableView.selectedRow].id, buffer: &buffer)
+        startTime = Date().timeIntervalSince1970
+        gameData.loadPicture(id: pictures[picturesTableView.selectedRow].id)
     }
 }
 

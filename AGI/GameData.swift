@@ -18,6 +18,16 @@ class GameData {
     }
     let allFilesDirectories = ["mh2dir", "mhdir", "grdir", "kq4dir"]
     
+    // Rendering
+    let width = 320
+    let height = 200
+    var pictureBuffer: NSMutableArray
+    var priorityBuffer: NSMutableArray
+    
+    var bitfield = UnsafeMutablePointer<UInt8>.allocate(capacity: 320 * 200 * 4)
+    var clearBitfield = UnsafeMutablePointer<UInt8>.allocate(capacity: 320 * 200 * 4)
+    
+    
     private var agiVersion = 2
     private var picturesDirectory: Directory?
     private var viewDirectory: Directory?
@@ -27,10 +37,23 @@ class GameData {
     private var objects: [Object] = []
     private var redrawLambda: (() -> Void)? = nil
     
+    init() {
+        pictureBuffer = NSMutableArray.init(capacity: width * height)
+        priorityBuffer = NSMutableArray.init(capacity: width * height)
+        
+        for pos in 0..<(width * height) {
+            pictureBuffer[pos] = Pixel(a: 255, r: 255, g: 255, b: 255)
+            priorityBuffer[pos] = Pixel(a: 255, r: 172, g: 0, b: 0)
+        }
+        
+        memset(bitfield, 255, 320 * 200 * 4)
+        memset(clearBitfield, 255, 320 * 200 * 4)
+    }
+    
     func loadGameData(from path: String,
-                      with buffer: inout [Pixel],
                       loadFinished: ([Int: Picture]) -> Void,
                       redraw: @escaping () -> Void) {
+        
         do {
             agiVersion = 2
             picturesDirectory = nil
@@ -94,10 +117,20 @@ class GameData {
         loadFinished(pictures)
     }
     
-    func loadPicture(id: Int, buffer: inout [Pixel]) {
+    func loadPicture(id: Int) {
         if let picture = pictures[id] {
             
-            picture.drawToBuffer(buffer: &buffer)
+            // Clear buffers
+            /*for pos in 0..<(width * height) {
+                //pictureBuffer[pos] = Pixel(a: 255, r: 255, g: 255, b: 255)
+                //priorityBuffer[pos] = Pixel(a: 255, r: 172, g: 0, b: 0)
+            }*/
+            
+            memcpy(bitfield, clearBitfield, 320 * 200 * 4)
+            //memset(bitfield, 255, 320 * 200 * 4)
+            
+            // Draw the picture to the buffers
+            picture.drawToBuffer()
             
             redrawLambda?()
         }
@@ -140,7 +173,7 @@ class GameData {
                                                          position: directoryItem.position) {
                         
                         Utils.debug("Picture \(pos) data: \(pictureData.length)")
-                        pictures[pos] = Picture(with: pictureData, id: pos, version: agiVersion)
+                        pictures[pos] = Picture(with: self, data: pictureData, id: pos, version: agiVersion)
                     }
                 }
             }

@@ -9,7 +9,7 @@ import Foundation
 
 extension Picture {
     
-    func fill(buffer: inout [Pixel]) {
+    func fill() {
         Utils.debug("Fill")
 
         while (peekNextByte() < 0xF0) {
@@ -17,13 +17,16 @@ extension Picture {
             let posX = getNextByte()
             let posY = getNextByte()
    
-            if isDrawingPicture {
-                floodFill(&buffer, posX, posY)
-            }
+            if isDrawingPicture { floodFill(gameData.pictureBuffer, currentPictureColor, palette[15], posX, posY) }
+            //if isDrawingPriority { floodFill(gameData.priorityBuffer, currentPriorityColor, palette[4], posX, posY) }
         }
     }
     
-    private func floodFill(_ buffer: inout [Pixel], _ posX: UInt8, _ posY: UInt8) {
+    private func floodFill(_ buffer: NSMutableArray,
+                           _ currentColor: Pixel,
+                           _ backgroundColor: Pixel,
+                           _ posX: UInt8,
+                           _ posY: UInt8) {
         
         struct FillPosition: Equatable {
             let posX: UInt8
@@ -42,7 +45,7 @@ extension Picture {
         func addToFillQueue(_ posX: UInt8, _ posY: UInt8) {
             
             let pixelColor = getPixel(from: buffer, x: posX, y: posY)
-            if pixelColor != currentColor && pixelColor == palette[15] {
+            if pixelColor != currentColor && pixelColor == backgroundColor {
                 fillQueue.append(FillPosition(posX, posY))
             }
         }
@@ -59,7 +62,7 @@ extension Picture {
             let posY = lastItem.posY
             
             // Color the current pixel
-            drawPixel(to: &buffer, x: posX, y: posY)
+            drawPixel(to: buffer, color: currentColor, x: posX, y: posY)
             
             // If the pixel to the left is white, add to the queue
             if posX > 0 {

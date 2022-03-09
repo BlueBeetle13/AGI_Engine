@@ -9,7 +9,7 @@ import Foundation
 
 extension Picture {
     
-    func drawCornerLine(isYDirection: Bool, buffer: inout [Pixel]) {
+    func drawCornerLine(isYDirection: Bool) {
         Utils.debug("Draw Y Corner")
         
         var startX: UInt8 = 0
@@ -34,9 +34,7 @@ extension Picture {
                 endX = getNextByte()
             }
             
-            if isDrawingPicture {
-                drawLine(&buffer, startX, startY, endX, endY)
-            }
+            drawLine(startX, startY, endX, endY)
             
             startX = endX
             startY = endY
@@ -44,7 +42,7 @@ extension Picture {
         }
     }
     
-    func drawAbsoluteLine(buffer: inout [Pixel]) {
+    func drawAbsoluteLine() {
         Utils.debug("Draw Absolute Line")
         
         var startX: UInt8 = 0
@@ -61,16 +59,14 @@ extension Picture {
             let endX = getNextByte()
             let endY = getNextByte()
             
-            if isDrawingPicture {
-                drawLine(&buffer, startX, startY, endX, endY)
-            }
+            drawLine(startX, startY, endX, endY)
             
             startX = endX
             startY = endY
         }
     }
     
-    func drawRelativeLine(buffer: inout [Pixel]) {
+    func drawRelativeLine() {
         Utils.debug("Draw Relative Line")
         
         var startX: UInt8 = 0
@@ -84,7 +80,7 @@ extension Picture {
         
         // Special case - only 1 pixel, no other data
         guard peekNextByte() < 0xF0 else {
-            drawPixel(to: &buffer, x: UInt8(startX), y: UInt8(startY))
+            drawPixel(x: UInt8(startX), y: UInt8(startY))
             return
         }
         
@@ -104,16 +100,18 @@ extension Picture {
             let endX = Int(startX) + xChange
             let endY = Int(startY) + yChange
             
-            if isDrawingPicture {
-                drawLine(&buffer, startX, startY, UInt8(endX), UInt8(endY))
-            }
+            drawLine(startX, startY, UInt8(endX), UInt8(endY))
             
             startX = UInt8(endX)
             startY = UInt8(endY)
         }
     }
     
-    private func drawLine(_ buffer: inout [Pixel], _ startX: UInt8, _ startY: UInt8, _ endX: UInt8, _ endY: UInt8) {
+    private func drawLine(_ startX: UInt8,
+                          _ startY: UInt8,
+                          _ endX: UInt8,
+                          _ endY: UInt8) {
+        
         Utils.debug("Draw Line: \(startX),\(startY) -> \(endX),\(endY)")
         
         func round(number: Double, direction: Double) -> UInt8 {
@@ -140,14 +138,12 @@ extension Picture {
             
             var x = Double(startX)
             while (UInt8(x) != endX) {
-                drawPixel(to: &buffer,
-                          x: round(number: x, direction: addX),
-                          y: round(number: y, direction: addY))
+                drawPixel(x: round(number: x, direction: addX), y: round(number: y, direction: addY))
                 x += addX
                 y += addY
             }
             
-            drawPixel(to: &buffer, x: endX, y: endY)
+            drawPixel(x: endX, y: endY)
         }
         else {
             var x = Double(startX);
@@ -155,14 +151,12 @@ extension Picture {
             
             var y = Double(startY)
             while (UInt8(y) != endY) {
-                drawPixel(to: &buffer,
-                          x: round(number: x, direction: addX),
-                          y: round(number: y, direction: addY))
+                drawPixel(x: round(number: x, direction: addX), y: round(number: y, direction: addY))
                 x += addX
                 y += addY
             }
             
-            drawPixel(to: &buffer, x: endX, y: endY)
+            drawPixel(x: endX, y: endY)
         }
     }
 }
