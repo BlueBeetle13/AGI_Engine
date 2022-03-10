@@ -9,7 +9,7 @@ import Foundation
 
 extension Picture {
     
-    func fill(buffer: inout [Pixel]) {
+    func fill() {
         Utils.debug("Fill")
 
         while (peekNextByte() < 0xF0) {
@@ -18,12 +18,12 @@ extension Picture {
             let posY = getNextByte()
    
             if isDrawingPicture {
-                floodFill(&buffer, Int(posX), Int(posY))
+                floodFill(x: Int(posX), y: Int(posY))
             }
         }
     }
     
-    private func floodFill(_ buffer: inout [Pixel], _ posX: Int, _ posY: Int) {
+    private func floodFill(x posX: Int, y posY: Int) {
         
         struct FillPosition {
             let posX: Int
@@ -34,8 +34,10 @@ extension Picture {
             
             guard posX >= 0, posX < 160, posY >= 0, posY < 200 - 32 else { return false }
             
-            let pixelColor = getPixel(from: buffer, x: posX, y: posY)
-            return (currentColor != palette[15] && pixelColor == palette[15])
+            let pixelColor = getPixel(x: posX, y: posY)
+            
+            return (currentPictureColor != palette[PaletteColor.white.rawValue] &&
+                        pixelColor == palette[PaletteColor.white.rawValue])
         }
         
         func addToFillQueue(_ posX: Int, _ posY: Int) {
@@ -68,7 +70,7 @@ extension Picture {
             var isCheckingDown = true
             
             while isPixelDrawable(posX, posY) {
-                drawPixel(to: &buffer, x: posX, y: posY)
+                drawPixel(x: posX, y: posY)
                 
                 if isPixelDrawable(posX, posY - 1) {
                     if isCheckingUp {

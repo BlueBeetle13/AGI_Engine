@@ -8,6 +8,14 @@
 import Foundation
 import AppKit
 
+public struct Pixel: Equatable {
+    var a,r,g,b: UInt8
+    
+    public static func == (lhs: Pixel, rhs: Pixel) -> Bool {
+        return lhs.a == rhs.a && lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b
+    }
+}
+
 class Picture {
     
     enum PaletteColor: Int {
@@ -51,23 +59,29 @@ class Picture {
     }
     
     let id: Int
+    var gameData: GameData
     var isDrawingPicture = false
     var isDrawingPriority = false
-    var currentColor = Pixel(a: 255, r: 0, g: 0, b: 0)
+    var currentPictureColor = Pixel(a: 255, r: 0, g: 0, b: 0)
     var currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
     let penSizes = PenSizes()
     
     private var data: NSData
     private var dataPosition = 0
+    private var width = 0
+    private var height = 0
     private var byteBuffer: UInt8 = 0
     private var prevByte: UInt8 = 0
     private var agiVersion: Int
     private var isVersion3BitShifting = false
     
-    init(with data: NSData, id: Int, version: Int) {
+    init(gameData: GameData, data: NSData, id: Int, version: Int) {
         self.id = id
-        self.agiVersion = version
+        self.gameData = gameData
+        self.width = gameData.width
+        self.height = gameData.height
         self.data = NSData.init(data: data as Data)
+        self.agiVersion = version
     }
     
     func getNextByte() -> UInt8 {
@@ -105,36 +119,36 @@ class Picture {
     }
     
     func arrayPos(_ x: Int, _ y: Int) -> Int {
-        guard x < 320 && y < 200 && x >= 0 && y >= 0 else { return 0 }
+        guard x < width && y < height && x >= 0 && y >= 0 else { return 0 }
         
-        return (Int(y) * 320) + Int(x)
+        return (Int(y) * width) + Int(x)
     }
     
-    func drawPixel(to buffer: inout [Pixel], x: UInt8, y: UInt8) {
-        drawPixel(to: &buffer, x: Int(x), y: Int(y))
+    func drawPixel(x: UInt8, y: UInt8) {
+        drawPixel(x: Int(x), y: Int(y))
     }
     
     // All drawing coordinates are for 160x200, we need to stretch every pixel 2x wide
-    func drawPixel(to buffer: inout [Pixel], x: Int, y: Int) {
-        buffer[arrayPos(x * 2, y)] = currentColor
-        buffer[arrayPos((x * 2) + 1, y)] = currentColor
+    func drawPixel(x: Int, y: Int) {
+        gameData.pictureBuffer[arrayPos(x * 2, y)] = currentPictureColor
+        gameData.pictureBuffer[arrayPos((x * 2) + 1, y)] = currentPictureColor
     }
     
-    func getPixel(from buffer: [Pixel], x: UInt8, y: UInt8) -> Pixel {
-        getPixel(from: buffer, x: Int(x), y: Int(y))
+    func getPixel(x: UInt8, y: UInt8) -> Pixel {
+        getPixel(x: Int(x), y: Int(y))
     }
     
-    func getPixel(from buffer: [Pixel], x: Int, y: Int) -> Pixel {
-        return buffer[arrayPos(x * 2, y)]
+    func getPixel(x: Int, y: Int) -> Pixel {
+        return gameData.pictureBuffer[arrayPos(x * 2, y)]
     }
     
-    func drawToBuffer(buffer: inout [Pixel]) {
+    func drawToBuffer() {
         dataPosition = 0
         byteBuffer = 0
         prevByte = 0
         isDrawingPicture = false
         isDrawingPriority = false
-        currentColor = palette[0]
+        currentPictureColor = palette[PaletteColor.black.rawValue]
         currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
         isVersion3BitShifting = false
         
@@ -158,25 +172,25 @@ class Picture {
                     disablePriorityDraw()
                     
                 case PictureAction.drawYCorner:
-                    drawCornerLine(isYDirection: true, buffer: &buffer)
+                    drawCornerLine(isYDirection: true)
                     
                 case PictureAction.drawXCorner:
-                    drawCornerLine(isYDirection: false, buffer: &buffer)
+                    drawCornerLine(isYDirection: false)
                     
                 case PictureAction.drawAbsoluteLine:
-                    drawAbsoluteLine(buffer: &buffer)
+                    drawAbsoluteLine()
                     
                 case PictureAction.drawRelativeLine:
-                    drawRelativeLine(buffer: &buffer)
+                    drawRelativeLine()
                     
                 case PictureAction.fill:
-                    fill(buffer: &buffer)
+                    fill()
                     
                 case PictureAction.changePenSizeAndStyle:
-                    changePenSizeAndStyle(buffer: &buffer)
+                    changePenSizeAndStyle()
                     
                 case PictureAction.plotWithPen:
-                    plotWithPen(buffer: &buffer)
+                    plotWithPen()
                     
                 case PictureAction.endOfPicture:
                     Utils.debug("End of Picture: \(dataPosition)")
@@ -204,10 +218,10 @@ class Picture {
         
         // Set the color
         if colorNum < palette.count {
-            currentColor = palette[colorNum]
+            currentPictureColor = palette[colorNum]
         }
         
-        Utils.debug("Enable Picture Draw: \(colorNum) \(currentColor)")
+        Utils.debug("Enable Picture Draw: \(colorNum) \(currentPictureColor)")
     }
     
     private func changePictureColorEnablePriorityDraw() {
@@ -225,7 +239,7 @@ class Picture {
             colorNum = Int(getNextByte())
         }
         
-        Utils.debug("Enable Priority Draw: \(colorNum) \(currentColor)")
+        Utils.debug("Enable Priority Draw: \(colorNum) \(currentPictureColor)")
     }
     
     private func disablePictureDraw() {

@@ -15,7 +15,7 @@ extension Picture {
         let penSize: UInt8
     }
     
-    func changePenSizeAndStyle(buffer: inout [Pixel]) {
+    func changePenSizeAndStyle() {
         let penInfo = getNextByte()
 
         currentPenType = PenType(isSolid: (penInfo & 0x20) == 0,
@@ -25,7 +25,7 @@ extension Picture {
         Utils.debug("Change Pen Size and Style: \(currentPenType)")
     }
     
-    func plotWithPen(buffer: inout [Pixel]) {
+    func plotWithPen() {
         Utils.debug("Plot With Pen")
         
         let penSize = Int(currentPenType.penSize)
@@ -64,7 +64,7 @@ extension Picture {
                                 
                                 // Plot within bounds
                                 if penX >= 0 && penY >= 0 && penX < 160 && penY < 200 {
-                                    drawPixel(to: &buffer, x: UInt8(penX), y: UInt8(penY))
+                                    drawPixel(x: UInt8(penX), y: UInt8(penY))
                                 }
                             }
                         }

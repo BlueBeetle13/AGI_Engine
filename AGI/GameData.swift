@@ -27,8 +27,16 @@ class GameData {
     private var objects: [Object] = []
     private var redrawLambda: (() -> Void)? = nil
     
+    // Rendering
+    let width = 320
+    let height = 200
+    var pictureBuffer: UnsafeMutablePointer<Pixel>
+    
+    init() {
+        pictureBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: width * height)
+    }
+    
     func loadGameData(from path: String,
-                      with buffer: inout [Pixel],
                       loadFinished: ([Int: Picture]) -> Void,
                       redraw: @escaping () -> Void) {
         do {
@@ -94,10 +102,13 @@ class GameData {
         loadFinished(pictures)
     }
     
-    func loadPicture(id: Int, buffer: inout [Pixel]) {
+    func loadPicture(id: Int) {
         if let picture = pictures[id] {
             
-            picture.drawToBuffer(buffer: &buffer)
+            //memset(pictureBuffer, 255, width * height * MemoryLayout<Pixel>.size)
+            memset(pictureBuffer, -2,147,483647, width * height)
+
+            picture.drawToBuffer()
             
             redrawLambda?()
         }
@@ -140,7 +151,7 @@ class GameData {
                                                          position: directoryItem.position) {
                         
                         Utils.debug("Picture \(pos) data: \(pictureData.length)")
-                        pictures[pos] = Picture(with: pictureData, id: pos, version: agiVersion)
+                        pictures[pos] = Picture(gameData: self, data: pictureData, id: pos, version: agiVersion)
                     }
                 }
             }
