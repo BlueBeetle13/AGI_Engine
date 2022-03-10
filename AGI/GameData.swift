@@ -105,8 +105,8 @@ class GameData {
     func loadPicture(id: Int) {
         if let picture = pictures[id] {
             
-            //memset(pictureBuffer, 255, width * height * MemoryLayout<Pixel>.size)
-            memset(pictureBuffer, -2,147,483647, width * height)
+            // Clear the buffer
+            memset(pictureBuffer, 0xFF, width * height * MemoryLayout<Pixel>.size)
 
             picture.drawToBuffer()
             

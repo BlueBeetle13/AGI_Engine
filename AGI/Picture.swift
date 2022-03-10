@@ -9,10 +9,10 @@ import Foundation
 import AppKit
 
 public struct Pixel: Equatable {
-    var a,r,g,b: UInt8
+    var r,g,b: UInt8
     
     public static func == (lhs: Pixel, rhs: Pixel) -> Bool {
-        return lhs.a == rhs.a && lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b
+        return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b
     }
 }
 
@@ -24,22 +24,22 @@ class Picture {
     }
 
     let palette: [Pixel] = [
-        Pixel(a: 255, r: 0, g: 0, b: 0), // Black
-        Pixel(a: 255, r: 0, g: 0, b: 172), // Blue
-        Pixel(a: 255, r: 0, g: 172, b: 0), // Green
-        Pixel(a: 255, r: 0, g: 172, b: 172), // Cyan
-        Pixel(a: 255, r: 172, g: 0, b: 0), // Red
-        Pixel(a: 255, r: 172, g: 0, b: 172), // Magenta
-        Pixel(a: 255, r: 172, g: 86, b: 0), // Brown
-        Pixel(a: 255, r: 172, g: 172, b: 172), // Light Grey
-        Pixel(a: 255, r: 86, g: 86, b: 86), // Dark Grey
-        Pixel(a: 255, r: 86, g: 86, b: 255), // Light Blue
-        Pixel(a: 255, r: 86, g: 255, b: 86), // Light Green
-        Pixel(a: 255, r: 86, g: 255, b: 255), // Light Cyan
-        Pixel(a: 255, r: 255, g: 86, b: 86), // Light Red
-        Pixel(a: 255, r: 255, g: 86, b: 255), // Light Magenta
-        Pixel(a: 255, r: 255, g: 255, b: 86), // Yellow
-        Pixel(a: 255, r: 255, g: 255, b: 255), // White
+        Pixel(r: 0, g: 0, b: 0), // Black
+        Pixel(r: 0, g: 0, b: 172), // Blue
+        Pixel(r: 0, g: 172, b: 0), // Green
+        Pixel(r: 0, g: 172, b: 172), // Cyan
+        Pixel(r: 172, g: 0, b: 0), // Red
+        Pixel(r: 172, g: 0, b: 172), // Magenta
+        Pixel(r: 172, g: 86, b: 0), // Brown
+        Pixel(r: 172, g: 172, b: 172), // Light Grey
+        Pixel(r: 86, g: 86, b: 86), // Dark Grey
+        Pixel(r: 86, g: 86, b: 255), // Light Blue
+        Pixel(r: 86, g: 255, b: 86), // Light Green
+        Pixel(r: 86, g: 255, b: 255), // Light Cyan
+        Pixel(r: 255, g: 86, b: 86), // Light Red
+        Pixel(r: 255, g: 86, b: 255), // Light Magenta
+        Pixel(r: 255, g: 255, b: 86), // Yellow
+        Pixel(r: 255, g: 255, b: 255), // White
     ]
 
     enum PictureAction: UInt8 {
@@ -62,7 +62,7 @@ class Picture {
     var gameData: GameData
     var isDrawingPicture = false
     var isDrawingPriority = false
-    var currentPictureColor = Pixel(a: 255, r: 0, g: 0, b: 0)
+    var currentPictureColor = Pixel(r: 0, g: 0, b: 0)
     var currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
     let penSizes = PenSizes()
     

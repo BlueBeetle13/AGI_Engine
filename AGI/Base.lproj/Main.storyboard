@@ -783,7 +783,7 @@
                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="18U-Lw-F7m" userLabel="Screen View">
                                 <rect key="frame" x="190" y="211" width="320" height="200"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="wyZ-O4-TfL"/>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageAlignment="topLeft" id="wyZ-O4-TfL"/>
                             </imageView>
                         </subviews>
                     </view>
