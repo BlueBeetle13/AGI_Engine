@@ -17,9 +17,7 @@ extension Picture {
             let posX = getNextByte()
             let posY = getNextByte()
    
-            if isDrawingPicture {
-                floodFill(x: Int(posX), y: Int(posY))
-            }
+            floodFill(x: Int(posX), y: Int(posY))
         }
     }
     
@@ -32,12 +30,23 @@ extension Picture {
         
         func isPixelDrawable(_ posX: Int, _ posY: Int) -> Bool {
             
-            guard posX >= 0, posX < 160, posY >= 0, posY < 200 - 32 else { return false }
+            guard posX >= 0, posX < pictureWidth, posY >= 0, posY < pictureHeight else { return false }
             
-            let pixelColor = getPixel(x: posX, y: posY)
+            let pictureColor = getPicturePixel(x: posX, y: posY)
+            let priorityColor = getPriorityPixel(x: posX, y: posY)
             
-            return (currentPictureColor != palette[PaletteColor.white.rawValue] &&
-                        pixelColor == palette[PaletteColor.white.rawValue])
+            // Drawing only Picture
+            if isDrawingPicture && !isDrawingPriority && currentPictureColor != Picture.colorWhite {
+                return pictureColor == Picture.colorWhite
+            }
+            
+            // Drawing only Priority
+            if isDrawingPriority && !isDrawingPicture && currentPriorityColor != Picture.colorRed {
+                return priorityColor == Picture.colorRed
+            }
+            
+            // Drawing Picture and (possibly) Priority
+            return (isDrawingPicture && pictureColor == Picture.colorWhite && currentPictureColor != Picture.colorWhite)
         }
         
         func addToFillQueue(_ posX: Int, _ posY: Int) {

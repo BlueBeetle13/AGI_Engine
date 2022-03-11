@@ -18,29 +18,27 @@ public struct Pixel: Equatable {
 
 class Picture {
     
-    enum PaletteColor: Int {
-        case black = 0
-        case white = 15
-    }
-
-    let palette: [Pixel] = [
-        Pixel(r: 0, g: 0, b: 0), // Black
-        Pixel(r: 0, g: 0, b: 172), // Blue
-        Pixel(r: 0, g: 172, b: 0), // Green
-        Pixel(r: 0, g: 172, b: 172), // Cyan
-        Pixel(r: 172, g: 0, b: 0), // Red
-        Pixel(r: 172, g: 0, b: 172), // Magenta
-        Pixel(r: 172, g: 86, b: 0), // Brown
-        Pixel(r: 172, g: 172, b: 172), // Light Grey
-        Pixel(r: 86, g: 86, b: 86), // Dark Grey
-        Pixel(r: 86, g: 86, b: 255), // Light Blue
-        Pixel(r: 86, g: 255, b: 86), // Light Green
-        Pixel(r: 86, g: 255, b: 255), // Light Cyan
-        Pixel(r: 255, g: 86, b: 86), // Light Red
-        Pixel(r: 255, g: 86, b: 255), // Light Magenta
-        Pixel(r: 255, g: 255, b: 86), // Yellow
-        Pixel(r: 255, g: 255, b: 255), // White
+    static let palette: [Pixel] = [
+        Pixel(r: 0, g: 0, b: 0),        // Black
+        Pixel(r: 0, g: 0, b: 168),      // Blue
+        Pixel(r: 0, g: 168, b: 0),      // Green
+        Pixel(r: 0, g: 168, b: 168),    // Cyan
+        Pixel(r: 168, g: 0, b: 0),      // Red
+        Pixel(r: 168, g: 0, b: 168),    // Magenta
+        Pixel(r: 168, g: 84, b: 0),     // Brown
+        Pixel(r: 168, g: 168, b: 168),  // Light Grey
+        Pixel(r: 84, g: 84, b: 84),     // Dark Grey
+        Pixel(r: 84, g: 84, b: 255),    // Light Blue
+        Pixel(r: 84, g: 255, b: 84),    // Light Green
+        Pixel(r: 84, g: 255, b: 255),   // Light Cyan
+        Pixel(r: 255, g: 84, b: 84),    // Light Red
+        Pixel(r: 255, g: 84, b: 255),   // Light Magenta
+        Pixel(r: 255, g: 255, b: 84),   // Yellow
+        Pixel(r: 255, g: 255, b: 255),  // White
     ]
+    static let colorBlack = palette[0]
+    static let colorRed = palette[4]
+    static let colorWhite = palette[15]
 
     enum PictureAction: UInt8 {
         case changePictureColorEnablePictureDraw = 0xF0
@@ -58,11 +56,14 @@ class Picture {
         
     }
     
+    let pictureWidth = 160          // Pictures are only 160 in width and each pixel is doubled width-wise
+    let pictureHeight = 200 - 32    // Height is reduced by 32 to for the menu bar at the top and text entry at the bottom
     let id: Int
     var gameData: GameData
     var isDrawingPicture = false
     var isDrawingPriority = false
-    var currentPictureColor = Pixel(r: 0, g: 0, b: 0)
+    var currentPictureColor: Pixel
+    var currentPriorityColor: Pixel
     var currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
     let penSizes = PenSizes()
     
@@ -82,6 +83,8 @@ class Picture {
         self.height = gameData.height
         self.data = NSData.init(data: data as Data)
         self.agiVersion = version
+        currentPictureColor = Picture.colorBlack
+        currentPriorityColor = Picture.colorBlack
     }
     
     func getNextByte() -> UInt8 {
@@ -130,16 +133,32 @@ class Picture {
     
     // All drawing coordinates are for 160x200, we need to stretch every pixel 2x wide
     func drawPixel(x: Int, y: Int) {
-        gameData.pictureBuffer[arrayPos(x * 2, y)] = currentPictureColor
-        gameData.pictureBuffer[arrayPos((x * 2) + 1, y)] = currentPictureColor
+        
+        if isDrawingPicture {
+            gameData.pictureBuffer[arrayPos(x * 2, y)] = currentPictureColor
+            gameData.pictureBuffer[arrayPos((x * 2) + 1, y)] = currentPictureColor
+        }
+        
+        if isDrawingPriority {
+            gameData.priorityBuffer[arrayPos(x * 2, y)] = currentPriorityColor
+            gameData.priorityBuffer[arrayPos((x * 2) + 1, y)] = currentPriorityColor
+        }
     }
     
-    func getPixel(x: UInt8, y: UInt8) -> Pixel {
-        getPixel(x: Int(x), y: Int(y))
+    func getPicturePixel(x: UInt8, y: UInt8) -> Pixel {
+        getPicturePixel(x: Int(x), y: Int(y))
     }
     
-    func getPixel(x: Int, y: Int) -> Pixel {
+    func getPicturePixel(x: Int, y: Int) -> Pixel {
         return gameData.pictureBuffer[arrayPos(x * 2, y)]
+    }
+    
+    func getPriorityPixel(x: UInt8, y: UInt8) -> Pixel {
+        getPriorityPixel(x: Int(x), y: Int(y))
+    }
+    
+    func getPriorityPixel(x: Int, y: Int) -> Pixel {
+        return gameData.priorityBuffer[arrayPos(x * 2, y)]
     }
     
     func drawToBuffer() {
@@ -148,7 +167,8 @@ class Picture {
         prevByte = 0
         isDrawingPicture = false
         isDrawingPriority = false
-        currentPictureColor = palette[PaletteColor.black.rawValue]
+        currentPictureColor = Picture.colorBlack
+        currentPriorityColor = Picture.colorBlack
         currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
         isVersion3BitShifting = false
         
@@ -217,11 +237,16 @@ class Picture {
         }
         
         // Set the color
-        if colorNum < palette.count {
-            currentPictureColor = palette[colorNum]
+        if colorNum < Picture.palette.count {
+            currentPictureColor = Picture.palette[colorNum]
         }
         
         Utils.debug("Enable Picture Draw: \(colorNum) \(currentPictureColor)")
+    }
+    
+    private func disablePictureDraw() {
+        Utils.debug("Disable Picture Draw")
+        isDrawingPicture = false
     }
     
     private func changePictureColorEnablePriorityDraw() {
@@ -239,12 +264,12 @@ class Picture {
             colorNum = Int(getNextByte())
         }
         
-        Utils.debug("Enable Priority Draw: \(colorNum) \(currentPictureColor)")
-    }
-    
-    private func disablePictureDraw() {
-        Utils.debug("Disable Picture Draw")
-        isDrawingPicture = false
+        // Set the color
+        if colorNum < Picture.palette.count {
+            currentPriorityColor = Picture.palette[colorNum]
+        }
+        
+        Utils.debug("Enable Priority Draw: \(colorNum) \(currentPriorityColor)")
     }
     
     private func disablePriorityDraw() {

@@ -33,6 +33,7 @@ extension NSImage {
 class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate {
     
     @IBOutlet weak var screenView: NSImageView!
+    @IBOutlet weak var priorityView: NSImageView!
     @IBOutlet weak var picturesTableView: NSTableView!
     
     // Rendering
@@ -79,14 +80,24 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                                         
                                         // Redraw image
                                         DispatchQueue.main.async {
+                                            
+                                            // Picture
                                             if let image = NSImage.init(pixels: self.gameData.pictureBuffer,
                                                                         width: self.gameData.width,
                                                                         height: self.gameData.height)  {
                                                 
                                                 self.screenView.image = image
-                                                
-                                                print("Time2: \(Date().timeIntervalSince1970 - self.renderStartTime)")
                                             }
+                                            
+                                            // Priority
+                                            if let image = NSImage.init(pixels: self.gameData.priorityBuffer,
+                                                                        width: self.gameData.width,
+                                                                        height: self.gameData.height)  {
+                                                
+                                                self.priorityView.image = image
+                                            }
+                                            
+                                            print("Time2: \(Date().timeIntervalSince1970 - self.renderStartTime)")
                                         }
                                       })
             }

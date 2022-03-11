@@ -46,39 +46,36 @@ extension Picture {
             let posX = Int(getNextByte())
             let posY = Int(getNextByte())
             
-            if isDrawingPicture {
-                
-                // Offset (currentPos is th center of the pen)
-                var penX = posX - penOffset[0]
-                var penY = posY - penOffset[1]
-                
-                for row in penPixels {
-                    for col in row {
+            // Offset (currentPos is th center of the pen)
+            var penX = posX - penOffset[0]
+            var penY = posY - penOffset[1]
+            
+            for row in penPixels {
+                for col in row {
+                    
+                    // This shape has a pixel here
+                    if col == 1 {
                         
-                        // This shape has a pixel here
-                        if col == 1 {
+                        // If we aren't using the texture OR
+                        // we are usng the texture but there is a pixel here
+                        if currentPenType.isSolid || !currentPenType.isSolid && penSizes.texture[textureOffset] == 1 {
                             
-                            // If we aren't using the texture OR
-                            // we are usng the texture but there is a pixel here
-                            if currentPenType.isSolid || !currentPenType.isSolid && penSizes.texture[textureOffset] == 1 {
-                                
-                                // Plot within bounds
-                                if penX >= 0 && penY >= 0 && penX < 160 && penY < 200 {
-                                    drawPixel(x: UInt8(penX), y: UInt8(penY))
-                                }
+                            // Plot within bounds
+                            if penX >= 0 && penY >= 0 && penX < pictureWidth && penY < pictureHeight {
+                                drawPixel(x: UInt8(penX), y: UInt8(penY))
                             }
-                        }
-                        
-                        penX += 1
-                        textureOffset += 1
-                        if textureOffset > 254 {
-                            textureOffset = 0
                         }
                     }
                     
-                    penX = posX - penOffset[0]
-                    penY += 1
+                    penX += 1
+                    textureOffset += 1
+                    if textureOffset > 254 {
+                        textureOffset = 0
+                    }
                 }
+                
+                penX = posX - penOffset[0]
+                penY += 1
             }
         }
     }

@@ -34,9 +34,7 @@ extension Picture {
                 endX = getNextByte()
             }
             
-            if isDrawingPicture {
-                drawLine(startX, startY, endX, endY)
-            }
+            drawLine(startX, startY, endX, endY)
             
             startX = endX
             startY = endY
@@ -61,9 +59,7 @@ extension Picture {
             let endX = getNextByte()
             let endY = getNextByte()
             
-            if isDrawingPicture {
-                drawLine(startX, startY, endX, endY)
-            }
+            drawLine(startX, startY, endX, endY)
             
             startX = endX
             startY = endY
@@ -104,9 +100,7 @@ extension Picture {
             let endX = Int(startX) + xChange
             let endY = Int(startY) + yChange
             
-            if isDrawingPicture {
-                drawLine(startX, startY, UInt8(endX), UInt8(endY))
-            }
+            drawLine(startX, startY, UInt8(endX), UInt8(endY))
             
             startX = UInt8(endX)
             startY = UInt8(endY)

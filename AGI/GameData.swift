@@ -31,9 +31,18 @@ class GameData {
     let width = 320
     let height = 200
     var pictureBuffer: UnsafeMutablePointer<Pixel>
+    var priorityBuffer: UnsafeMutablePointer<Pixel>
+    var priorityClearBuffer: UnsafeMutablePointer<Pixel>
     
     init() {
         pictureBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: width * height)
+        priorityBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: width * height)
+        priorityClearBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: width * height)
+        
+        // Set priority clear buffer to all red
+        for pos in 0..<(width * height) {
+            priorityClearBuffer[pos] = Picture.colorRed
+        }
     }
     
     func loadGameData(from path: String,
@@ -105,8 +114,9 @@ class GameData {
     func loadPicture(id: Int) {
         if let picture = pictures[id] {
             
-            // Clear the buffer
+            // Clear the buffers
             memset(pictureBuffer, 0xFF, width * height * MemoryLayout<Pixel>.size)
+            memcpy(priorityBuffer, priorityClearBuffer, width * height * MemoryLayout<Pixel>.size)
 
             picture.drawToBuffer()
             
