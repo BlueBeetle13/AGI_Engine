@@ -23,6 +23,7 @@ class GameData {
     private var viewDirectory: Directory?
     private let volumes = Volume()
     private var pictures: [Int: Picture] = [:]
+    private var views: [Int: View] = [:]
     private var words: [Word] = []
     private var objects: [Object] = []
     private var redrawLambda: (() -> Void)? = nil
@@ -104,8 +105,11 @@ class GameData {
         
         // Now that we have read in all the files, populate the data structures
         
-        // Get all the pictures
+        // Get all the picture data from the vol files
         loadPictureData()
+        
+        // Get all the view data from the vol files
+        loadViewData()
         
         // Tell UI load is finished
         loadFinished(pictures)
@@ -162,6 +166,25 @@ class GameData {
                         
                         Utils.debug("Picture \(pos) data: \(pictureData.length)")
                         pictures[pos] = Picture(gameData: self, data: pictureData, id: pos, version: agiVersion)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func loadViewData() {
+        
+        if let items = viewDirectory?.items {
+            for pos in 0..<items.count {
+                if let directoryItem = items[pos] {
+                    
+                    Utils.debug("View \(pos): \(directoryItem.volumeNumber), \(directoryItem.position)")
+                    if let viewData = volumes.getData(version: agiVersion,
+                                                      volumeNumber: directoryItem.volumeNumber,
+                                                      position: directoryItem.position) {
+                        
+                        Utils.debug("View \(pos) data: \(viewData.length)")
+                        views[pos] = View(gameData: self, data: viewData, id: pos, version: agiVersion)
                     }
                 }
             }
