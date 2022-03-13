@@ -35,18 +35,23 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
     @IBOutlet weak var screenView: NSImageView!
     @IBOutlet weak var priorityView: NSImageView!
     @IBOutlet weak var picturesTableView: NSTableView!
+    @IBOutlet weak var viewsTableView: NSTableView!
     
     // Rendering
     var renderStartTime: TimeInterval = 0
     
     let gameData = GameData()
     var pictures: [Picture] = []
+    var views: [View] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         picturesTableView.dataSource = self
         picturesTableView.delegate = self
+        
+        viewsTableView.dataSource = self
+        viewsTableView.delegate = self
     }
     
     @IBAction func onLoadButtonPressed(_ sender: Any) {
@@ -64,14 +69,18 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                 print("Folder: \(path)")
                 
                 gameData.loadGameData(from: path,
-                                      loadFinished: { pictures in
+                                      loadFinished: { pictures, views in
                                         self.pictures = Array(pictures.values).sorted(by: { $0.id < $1.id })
+                                        self.views = Array(views.values).sorted(by: { $0.id < $1.id })
                                         
                                         DispatchQueue.main.async {
                                             self.picturesTableView.reloadData()
                                             self.picturesTableView.scrollRowToVisible(0)
                                             self.picturesTableView.selectRowIndexes(.init(integer: 0),
                                                                                     byExtendingSelection: false)
+                                            
+                                            self.viewsTableView.reloadData()
+                                            self.viewsTableView.scrollRowToVisible(0)
                                         }
                                       },
                                       redraw: {
@@ -105,26 +114,96 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
     }
     
     func numberOfRows(in tableView: NSTableView) -> Int {
-        return pictures.count
+        
+        // Pictures
+        if tableView == picturesTableView {
+            return pictures.count
+        }
+        
+        // Views
+        else {
+            
+            var numRows = 0
+            for view in views {
+                for loop in view.loops {
+                    for _ in loop.cells {
+                        numRows += 1
+                    }
+                }
+            }
+            return numRows
+        }
     }
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         
-        if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "pictureId"),
+        // Pictures
+        if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "pictureCellId"),
                                      owner: nil) as? NSTableCellView {
             cell.textField?.stringValue = "\(pictures[row].id)"
             return cell
+        }
+        
+        // Views
+        if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "viewCellId"),
+                                     owner: nil) as? NSTableCellView {
+            
+            var numRows = 0
+            for view in views {
+                for (loopIndex, loop) in view.loops.enumerated() {
+                    for (cellIndex, _) in loop.cells.enumerated() {
+                        
+                        if numRows == row {
+                            cell.textField?.stringValue = "V:\(view.id) L:\(loopIndex) C:\(cellIndex)"
+                            return cell
+                        }
+                        
+                        numRows += 1
+                    }
+                }
+            }
         }
         
         return nil
     }
     
     func tableViewSelectionDidChange(_ notification: Notification) {
-        print("Selected: \(pictures[picturesTableView.selectedRow].id)")
         
-        renderStartTime = Date().timeIntervalSince1970
-        
-        gameData.loadPicture(id: pictures[picturesTableView.selectedRow].id)
+        if let tableView = notification.object as? NSTableView {
+            
+            renderStartTime = Date().timeIntervalSince1970
+            
+            // Pictures
+            if tableView == picturesTableView {
+                print("Selected: \(pictures[picturesTableView.selectedRow].id)")
+                gameData.drawPicture(id: pictures[picturesTableView.selectedRow].id)
+                
+                // Deselect View
+                self.viewsTableView.deselectAll(nil)
+            }
+            
+            // Views
+            else if viewsTableView.selectedRow >= 0 {
+                if let viewInfo = viewsTableView.view(atColumn: 0,
+                                                      row: viewsTableView.selectedRow,
+                                                      makeIfNecessary: false) as? NSTableCellView {
+                    
+                    // Extract the view info
+                    var viewNum = 0
+                    var loopNum = 0
+                    var cellNum = 0
+                    if let itemsArray = viewInfo.textField?.stringValue.split(separator: " "), itemsArray.count == 3 {
+                        
+                        viewNum = (itemsArray[0].split(separator: ":").last as NSString?)?.integerValue ?? 0
+                        loopNum = (itemsArray[1].split(separator: ":").last as NSString?)?.integerValue ?? 0
+                        cellNum = (itemsArray[2].split(separator: ":").last as NSString?)?.integerValue ?? 0
+                        
+                        print("Selected: \(viewNum), \(loopNum), \(cellNum)")
+                        gameData.drawView(viewNum: viewNum, loopNum: loopNum, cellNum: cellNum)
+                    }
+                }
+            }
+        }
     }
 }
 

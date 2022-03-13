@@ -19,10 +19,13 @@ class GameData {
     let allFilesDirectories = ["mh2dir", "mhdir", "grdir", "kq4dir"]
     
     private var agiVersion = 2
+    private var logicDirectory: Directory?
     private var picturesDirectory: Directory?
-    private var viewDirectory: Directory?
+    private var viewsDirectory: Directory?
+    private var soundsDirectory: Directory?
     private let volumes = Volume()
     private var pictures: [Int: Picture] = [:]
+    private var currentPictureNum = -1
     private var views: [Int: View] = [:]
     private var words: [Word] = []
     private var objects: [Object] = []
@@ -41,20 +44,22 @@ class GameData {
         priorityClearBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: width * height)
         
         // Set priority clear buffer to all red
-        for pos in 0..<(width * height) {
+        for pos in 0 ..< (width * height) {
             priorityClearBuffer[pos] = Picture.colorRed
         }
     }
     
     func loadGameData(from path: String,
-                      loadFinished: ([Int: Picture]) -> Void,
+                      loadFinished: ([Int: Picture], [Int: View]) -> Void,
                       redraw: @escaping () -> Void) {
         do {
             agiVersion = 2
             picturesDirectory = nil
-            viewDirectory = nil
+            viewsDirectory = nil
             volumes.clear()
             pictures.removeAll()
+            views.removeAll()
+            objects.removeAll()
             words.removeAll()
             redrawLambda = redraw
             
@@ -69,7 +74,7 @@ class GameData {
                     
                 // View Directory
                 case FileName.view.rawValue:
-                    viewDirectory = loadDirectoryData(from: "\(path)/\(file)")
+                    viewsDirectory = loadDirectoryData(from: "\(path)/\(file)")
                     
                 // Words
                 case FileName.words.rawValue:
@@ -112,11 +117,13 @@ class GameData {
         loadViewData()
         
         // Tell UI load is finished
-        loadFinished(pictures)
+        loadFinished(pictures, views)
     }
     
-    func loadPicture(id: Int) {
+    func drawPicture(id: Int) {
         if let picture = pictures[id] {
+            
+            currentPictureNum = id
             
             // Clear the buffers
             memset(pictureBuffer, 0xFF, width * height * MemoryLayout<Pixel>.size)
@@ -128,6 +135,25 @@ class GameData {
         }
     }
     
+    func drawView(viewNum: Int, loopNum: Int, cellNum: Int) {
+        
+        if currentPictureNum != -1, let picture = pictures[currentPictureNum], let view = views[viewNum] {
+            
+            // Clear the buffers
+            memset(pictureBuffer, 0xFF, width * height * MemoryLayout<Pixel>.size)
+            memcpy(priorityBuffer, priorityClearBuffer, width * height * MemoryLayout<Pixel>.size)
+
+            // Draw the picture
+            picture.drawToBuffer()
+            
+            // Draw the view
+            view.drawView(loopNum: loopNum, cellNum: cellNum)
+            
+            redrawLambda?()
+            
+        }
+    }
+    
     private func loadAllFilesDirectoryData(_ path: String) {
         
         // Load the file to get the header and locations of the individual directories
@@ -135,17 +161,36 @@ class GameData {
             
             var dataPosition = 0
             
-            // This file must begin with 0x0800
-            guard Utils.getNextByte(at: &dataPosition, from: data) == 0x08,
-                  Utils.getNextByte(at: &dataPosition, from: data) == 0x00 else { return }
-            
             agiVersion = 3
             
-            let logDirectory = Utils.getNextWord(at: &dataPosition, from: data)
-            let picDirectory = Utils.getNextWord(at: &dataPosition, from: data)
+            let logicDirectoryStart = Utils.getNextWord(at: &dataPosition, from: data)
+            let pictureDirectoryStart = Utils.getNextWord(at: &dataPosition, from: data)
+            let viewDirectoryStart = Utils.getNextWord(at: &dataPosition, from: data)
+            let soundDirectoryStart = Utils.getNextWord(at: &dataPosition, from: data)
             
-            let picData = data.subdata(with: NSRange(location: logDirectory, length:  picDirectory - logDirectory))
-            picturesDirectory = Directory(picData as NSData)
+            // Logic
+            let logicData = data.subdata(with: NSRange(location: logicDirectoryStart,
+                                                       length: pictureDirectoryStart - logicDirectoryStart))
+            logicDirectory = Directory(logicData as NSData)
+            
+            // Pictures
+            let pictureData = data.subdata(with: NSRange(location: pictureDirectoryStart,
+                                                         length: viewDirectoryStart - pictureDirectoryStart))
+            picturesDirectory = Directory(pictureData as NSData)
+            
+            // View
+            let viewData = data.subdata(with: NSRange(location: viewDirectoryStart,
+                                                      length: soundDirectoryStart - viewDirectoryStart))
+            viewsDirectory = Directory(viewData as NSData)
+            
+            // Sound
+            var soundDirectoryLength = data.length - soundDirectoryStart
+            if soundDirectoryLength > 256 * 3 {
+                soundDirectoryLength = 256 * 3
+            }
+            let soundData = data.subdata(with: NSRange(location: soundDirectoryStart,
+                                                       length: soundDirectoryLength))
+            soundsDirectory = Directory(soundData as NSData)
         }
     }
     
@@ -155,17 +200,17 @@ class GameData {
     
     private func loadPictureData() {
         
-        if let items = picturesDirectory?.items {
-            for pos in 0..<items.count {
-                if let directoryItem = items[pos] {
+        if let keys = picturesDirectory?.items.keys.sorted() {
+            for key in keys {
+                if let directoryItem = picturesDirectory?.items[key] {
                     
-                    Utils.debug("Picture \(pos): \(directoryItem.volumeNumber), \(directoryItem.position)")
+                    Utils.debug("Picture \(key): \(directoryItem.volumeNumber), \(directoryItem.position)")
                     if let pictureData = volumes.getData(version: agiVersion,
                                                          volumeNumber: directoryItem.volumeNumber,
                                                          position: directoryItem.position) {
                         
-                        Utils.debug("Picture \(pos) data: \(pictureData.length)")
-                        pictures[pos] = Picture(gameData: self, data: pictureData, id: pos, version: agiVersion)
+                        Utils.debug("Picture \(key) data: \(pictureData.length)")
+                        pictures[key] = Picture(gameData: self, data: pictureData, id: key, version: agiVersion)
                     }
                 }
             }
@@ -174,20 +219,35 @@ class GameData {
     
     private func loadViewData() {
         
-        if let items = viewDirectory?.items {
-            for pos in 0..<items.count {
-                if let directoryItem = items[pos] {
+        if let keys = viewsDirectory?.items.keys.sorted() {
+            for key in keys {
+                if let directoryItem = viewsDirectory?.items[key] {
                     
-                    Utils.debug("View \(pos): \(directoryItem.volumeNumber), \(directoryItem.position)")
+                    Utils.debug("View \(key): \(directoryItem.volumeNumber), \(directoryItem.position)")
                     if let viewData = volumes.getData(version: agiVersion,
                                                       volumeNumber: directoryItem.volumeNumber,
                                                       position: directoryItem.position) {
                         
-                        Utils.debug("View \(pos) data: \(viewData.length)")
-                        views[pos] = View(gameData: self, data: viewData, id: pos, version: agiVersion)
+                        Utils.debug("View \(key) data: \(viewData.length)")
+                        views[key] = View(gameData: self, compressedData: viewData, id: key, version: agiVersion)
                     }
                 }
             }
         }
+    }
+    
+    private func arrayPos(_ x: Int, _ y: Int) -> Int {
+        guard x < width && y < height && x >= 0 && y >= 0 else { return 0 }
+        
+        return (Int(y) * width) + Int(x)
+    }
+    
+    func drawPixel(buffer: UnsafeMutablePointer<Pixel>, x: Int, y: Int, color: Pixel) {
+        buffer[arrayPos(x * 2, y)] = color
+        buffer[arrayPos((x * 2) + 1, y)] = color
+    }
+    
+    func getPixel(buffer: UnsafeMutablePointer<Pixel>, x: Int, y: Int) -> Pixel {
+        buffer[arrayPos(x * 2, y)]
     }
 }

@@ -121,12 +121,6 @@ class Picture {
         return PictureAction.endOfPicture.rawValue
     }
     
-    func arrayPos(_ x: Int, _ y: Int) -> Int {
-        guard x < width && y < height && x >= 0 && y >= 0 else { return 0 }
-        
-        return (Int(y) * width) + Int(x)
-    }
-    
     func drawPixel(x: UInt8, y: UInt8) {
         drawPixel(x: Int(x), y: Int(y))
     }
@@ -135,13 +129,11 @@ class Picture {
     func drawPixel(x: Int, y: Int) {
         
         if isDrawingPicture {
-            gameData.pictureBuffer[arrayPos(x * 2, y)] = currentPictureColor
-            gameData.pictureBuffer[arrayPos((x * 2) + 1, y)] = currentPictureColor
+            gameData.drawPixel(buffer: gameData.pictureBuffer, x: x, y: y, color: currentPictureColor)
         }
         
         if isDrawingPriority {
-            gameData.priorityBuffer[arrayPos(x * 2, y)] = currentPriorityColor
-            gameData.priorityBuffer[arrayPos((x * 2) + 1, y)] = currentPriorityColor
+            gameData.drawPixel(buffer: gameData.priorityBuffer, x: x, y: y, color: currentPriorityColor)
         }
     }
     
@@ -150,7 +142,7 @@ class Picture {
     }
     
     func getPicturePixel(x: Int, y: Int) -> Pixel {
-        return gameData.pictureBuffer[arrayPos(x * 2, y)]
+        return gameData.getPixel(buffer: gameData.pictureBuffer, x: x, y: y)
     }
     
     func getPriorityPixel(x: UInt8, y: UInt8) -> Pixel {
@@ -158,7 +150,7 @@ class Picture {
     }
     
     func getPriorityPixel(x: Int, y: Int) -> Pixel {
-        return gameData.priorityBuffer[arrayPos(x * 2, y)]
+        return gameData.getPixel(buffer: gameData.priorityBuffer, x: x, y: y)
     }
     
     func drawToBuffer() {

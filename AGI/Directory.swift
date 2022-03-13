@@ -42,7 +42,7 @@ class Directory {
         let bytes: [UInt8] = data.map { $0 }
         
         var index: Int = 0
-        for itemNum in 0..<(data.length / 3) {
+        for itemNum in 0 ..< (data.length / 3) {
             let byte1 = bytes[index]
             let byte2 = bytes[index + 1]
             let byte3 = bytes[index + 2]

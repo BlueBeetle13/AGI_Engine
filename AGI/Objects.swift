@@ -72,7 +72,7 @@ class Objects {
                 Utils.debug("Total Objects: \(numObjects), Offset: \(itemNamesOffset), Encrypted: \(isEncrypted), Padding: \(padding)")
                 
                 // Get the object offsets and starting room numbers
-                for objectNum in 0..<numObjects {
+                for objectNum in 0 ..< numObjects {
                     
                     // Move to the expected position and read the offset
                     dataPosition = (objectNum + 1) * padding
@@ -90,7 +90,7 @@ class Objects {
                 
                 // Get the object names
                 dataPosition = itemNamesOffset
-                for pos in 1..<objects.count {
+                for pos in 1 ..< objects.count {
                     
                     dataPosition = Int(objects[pos].offset)
                     
