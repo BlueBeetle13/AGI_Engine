@@ -9,8 +9,8 @@ import Foundation
 
 extension Picture {
     
-    func drawCornerLine(isYDirection: Bool) {
-        Utils.debug("Draw Y Corner")
+    /// Get the starting coordinates of the line. If there are no more bytes then this must be a 1 pixel line
+    private func getLineStartPos() -> (UInt8, UInt8)? {
         
         var startX: UInt8 = 0
         var startY: UInt8 = 0
@@ -20,6 +20,20 @@ extension Picture {
             startX = getNextByte()
             startY = getNextByte()
         }
+        
+        // Special case - only 1 pixel, no other data
+        guard peekNextByte() < 0xF0 else {
+            drawPixel(x: UInt8(startX), y: UInt8(startY))
+            return nil
+        }
+        
+        return (startX, startY)
+    }
+    
+    func drawCornerLine(isYDirection: Bool) {
+        Utils.debug("Draw Y Corner")
+        
+        guard var (startX, startY) = getLineStartPos() else { return }
         
         var isYDirection = isYDirection
         
@@ -45,14 +59,7 @@ extension Picture {
     func drawAbsoluteLine() {
         Utils.debug("Draw Absolute Line")
         
-        var startX: UInt8 = 0
-        var startY: UInt8 = 0
-        
-        // Get the starting positions
-        if peekNextByte() < 0xF0 {
-            startX = getNextByte()
-            startY = getNextByte()
-        }
+        guard var (startX, startY) = getLineStartPos() else { return }
         
         while (peekNextByte() < 0xF0) {
             
@@ -69,20 +76,7 @@ extension Picture {
     func drawRelativeLine() {
         Utils.debug("Draw Relative Line")
         
-        var startX: UInt8 = 0
-        var startY: UInt8 = 0
-        
-        // Get the starting positions
-        if peekNextByte() < 0xF0 {
-            startX = getNextByte()
-            startY = getNextByte()
-        }
-        
-        // Special case - only 1 pixel, no other data
-        guard peekNextByte() < 0xF0 else {
-            drawPixel(x: UInt8(startX), y: UInt8(startY))
-            return
-        }
+        guard var (startX, startY) = getLineStartPos() else { return }
         
         // Keep drawing lines as long as we are getting displacements
         while peekNextByte() < 0xF0 {
