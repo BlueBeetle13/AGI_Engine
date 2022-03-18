@@ -13,6 +13,7 @@ struct Object {
     var name: String
 }
 
+/// An Object consists of an initial room number and a name. Used for inventory items
 class Objects {
     
     static let locationInitiallyCarried: UInt8 = 0xFF

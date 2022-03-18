@@ -97,6 +97,57 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4A11F8E727E54C8A008099C3 /* AGI Engine */ = {
+			isa = PBXGroup;
+			children = (
+				4A691AC427C72EE0001352E9 /* GameData.swift */,
+				4A11F8EB27E54CF5008099C3 /* Logic */,
+				4A11F8E927E54CB4008099C3 /* Data */,
+				4A11F8E827E54C98008099C3 /* Drawing */,
+				4A11F8EA27E54CC6008099C3 /* Utils */,
+			);
+			path = "AGI Engine";
+			sourceTree = "<group>";
+		};
+		4A11F8E827E54C98008099C3 /* Drawing */ = {
+			isa = PBXGroup;
+			children = (
+				4A88745F27DD889200B0F62F /* View.swift */,
+				4A691AC927C72EF4001352E9 /* Picture.swift */,
+				4A13154727D2BC430098908E /* Picture+Pen.swift */,
+				4A13154227D2BC0C0098908E /* Picture+Fill.swift */,
+				4A13153D27D2BACF0098908E /* Picture+Line.swift */,
+			);
+			path = Drawing;
+			sourceTree = "<group>";
+		};
+		4A11F8E927E54CB4008099C3 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				4A691AD627C73849001352E9 /* Directory.swift */,
+				4A691ADE27C74F1C001352E9 /* Volume.swift */,
+				4AFBAA3127D5A88900193D77 /* Objects.swift */,
+				4A28412F27D409D600F61AD0 /* Words.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		4A11F8EA27E54CC6008099C3 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				4A28413427D552CE00F61AD0 /* Utils.swift */,
+				4A88746427DE8BB600B0F62F /* LZWExpand.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		4A11F8EB27E54CF5008099C3 /* Logic */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Logic;
+			sourceTree = "<group>";
+		};
 		4A691A8927C72DC9001352E9 = {
 			isa = PBXGroup;
 			children = (
@@ -126,18 +177,7 @@
 				4A691A9B27C72DD3001352E9 /* Main.storyboard */,
 				4A691A9E27C72DD3001352E9 /* Info.plist */,
 				4A691A9F27C72DD3001352E9 /* AGI.entitlements */,
-				4A691AC427C72EE0001352E9 /* GameData.swift */,
-				4A691AD627C73849001352E9 /* Directory.swift */,
-				4A691ADE27C74F1C001352E9 /* Volume.swift */,
-				4A88745F27DD889200B0F62F /* View.swift */,
-				4A691AC927C72EF4001352E9 /* Picture.swift */,
-				4A13154727D2BC430098908E /* Picture+Pen.swift */,
-				4A13154227D2BC0C0098908E /* Picture+Fill.swift */,
-				4A13153D27D2BACF0098908E /* Picture+Line.swift */,
-				4A28412F27D409D600F61AD0 /* Words.swift */,
-				4AFBAA3127D5A88900193D77 /* Objects.swift */,
-				4A28413427D552CE00F61AD0 /* Utils.swift */,
-				4A88746427DE8BB600B0F62F /* LZWExpand.swift */,
+				4A11F8E727E54C8A008099C3 /* AGI Engine */,
 			);
 			path = AGI;
 			sourceTree = "<group>";

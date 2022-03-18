@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Extract the data from a Volume based on the position and volume number. Ensure the header is correct, and if so return the NSData holding the data bytes
 class Volume {
     
     private struct Header {

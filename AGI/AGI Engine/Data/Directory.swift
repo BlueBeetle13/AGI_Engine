@@ -17,6 +17,7 @@ struct DirectoryItem {
     }
 }
 
+/// Directory is a dictionary of the item number pointing to the location of the data (volume file and position of the Volume object
 class Directory {
     
     var items: [Int: DirectoryItem] = [:]

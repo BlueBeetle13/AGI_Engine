@@ -12,6 +12,7 @@ struct Word {
     let text: String
 }
 
+/// Words that the user can type in the game
 class Words {
     
     private static let maxWordCharacters = 64
