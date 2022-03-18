@@ -207,6 +207,7 @@ class Picture {
                 case PictureAction.endOfPicture:
                     Utils.debug("End of Picture: \(dataPosition)")
                 }
+                
             } else {
                 Utils.debug("Unknown Picture Action: \(byte)")
             }

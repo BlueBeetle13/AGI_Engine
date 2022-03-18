@@ -9,8 +9,8 @@ import Foundation
 
 class Utils {
     
-    static func debug(_ message: String) { print(message) }
-    //static func debug(_ message: String) { }
+    //static func debug(_ message: String) { print(message) }
+    static func debug(_ message: String) { }
     
     static func getNextByte(at dataPosition: inout Int, from data: NSData) -> UInt8 {
         var byteBuffer: UInt8 = 0

@@ -52,7 +52,7 @@ class Volume {
                 
                 // Ensure we have the right signature
                 if (header.signature == 0x1234) {
-                    print("Header: \(header)")
+                    Utils.debug("Header: \(header)")
                     
                     let length = (version == 3) ? Int(header.compressedLength) : Int(header.length)
                     return data.subdata(with: NSRange(location: Int(position) + dataBytes,

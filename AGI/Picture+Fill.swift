@@ -10,13 +10,14 @@ import Foundation
 extension Picture {
     
     func fill() {
-        Utils.debug("Fill")
-
+        
         while (peekNextByte() < 0xF0) {
             
             let posX = getNextByte()
             let posY = getNextByte()
-   
+            
+            Utils.debug("Fill: \(posX),\(posY)")
+            
             floodFill(x: Int(posX), y: Int(posY))
         }
     }
