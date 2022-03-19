@@ -33,7 +33,7 @@ class GameData {
     
     // Rendering
     let width = 320
-    let height = 200
+    let height = 168
     var pictureBuffer: UnsafeMutablePointer<Pixel>
     var priorityBuffer: UnsafeMutablePointer<Pixel>
     var priorityClearBuffer: UnsafeMutablePointer<Pixel>

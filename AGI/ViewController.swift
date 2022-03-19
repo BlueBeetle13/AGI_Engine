@@ -36,6 +36,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
     @IBOutlet weak var priorityView: NSImageView!
     @IBOutlet weak var picturesTableView: NSTableView!
     @IBOutlet weak var viewsTableView: NSTableView!
+    @IBOutlet weak var doubleResolutionButton: NSButton!
     
     // Rendering
     var renderStartTime: TimeInterval = 0
@@ -110,6 +111,15 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                                         }
                                       })
             }
+        }
+    }
+    @IBAction func onDoubleResolutionChecked(_ sender: Any) {
+        if doubleResolutionButton.state == .on {
+            screenView.imageScaling = .scaleProportionallyUpOrDown
+            priorityView.imageScaling = .scaleProportionallyUpOrDown
+        } else {
+            screenView.imageScaling = .scaleNone
+            priorityView.imageScaling = .scaleNone
         }
     }
     
