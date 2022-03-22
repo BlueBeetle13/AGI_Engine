@@ -24,6 +24,8 @@
 		4A691ADF27C74F1C001352E9 /* Volume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A691ADE27C74F1C001352E9 /* Volume.swift */; };
 		4A88746027DD889200B0F62F /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A88745F27DD889200B0F62F /* View.swift */; };
 		4A88746527DE8BB600B0F62F /* LZWExpand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A88746427DE8BB600B0F62F /* LZWExpand.swift */; };
+		4AAC8B8C27E969C000D00FF4 /* Logic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAC8B8B27E969C000D00FF4 /* Logic.swift */; };
+		4AAC8B9127E96A1B00D00FF4 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAC8B9027E96A1B00D00FF4 /* Resource.swift */; };
 		4AFBAA3227D5A88900193D77 /* Objects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFBAA3127D5A88900193D77 /* Objects.swift */; };
 /* End PBXBuildFile section */
 
@@ -69,6 +71,8 @@
 		4A691ADE27C74F1C001352E9 /* Volume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Volume.swift; sourceTree = "<group>"; };
 		4A88745F27DD889200B0F62F /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		4A88746427DE8BB600B0F62F /* LZWExpand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LZWExpand.swift; sourceTree = "<group>"; };
+		4AAC8B8B27E969C000D00FF4 /* Logic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logic.swift; sourceTree = "<group>"; };
+		4AAC8B9027E96A1B00D00FF4 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		4AFBAA3127D5A88900193D77 /* Objects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Objects.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -101,6 +105,7 @@
 			isa = PBXGroup;
 			children = (
 				4A691AC427C72EE0001352E9 /* GameData.swift */,
+				4AAC8B9027E96A1B00D00FF4 /* Resource.swift */,
 				4A11F8EB27E54CF5008099C3 /* Logic */,
 				4A11F8E927E54CB4008099C3 /* Data */,
 				4A11F8E827E54C98008099C3 /* Drawing */,
@@ -144,6 +149,7 @@
 		4A11F8EB27E54CF5008099C3 /* Logic */ = {
 			isa = PBXGroup;
 			children = (
+				4AAC8B8B27E969C000D00FF4 /* Logic.swift */,
 			);
 			path = Logic;
 			sourceTree = "<group>";
@@ -330,6 +336,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A88746027DD889200B0F62F /* View.swift in Sources */,
+				4AAC8B9127E96A1B00D00FF4 /* Resource.swift in Sources */,
+				4AAC8B8C27E969C000D00FF4 /* Logic.swift in Sources */,
 				4A691ACA27C72EF4001352E9 /* Picture.swift in Sources */,
 				4A691A9827C72DCA001352E9 /* ViewController.swift in Sources */,
 				4A691AC527C72EE0001352E9 /* GameData.swift in Sources */,

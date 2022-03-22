@@ -16,7 +16,7 @@ public struct Pixel: Equatable {
     }
 }
 
-class Picture {
+class Picture: Resource {
     
     static let palette: [Pixel] = [
         Pixel(r: 0, g: 0, b: 0),        // Black
@@ -58,8 +58,6 @@ class Picture {
     
     let pictureWidth = 160          // Pictures are only 160 in width and each pixel is doubled width-wise
     let pictureHeight = 200 - 32    // Height is reduced by 32 to for the menu bar at the top and text entry at the bottom
-    let id: Int
-    var gameData: GameData
     var isDrawingPicture = false
     var isDrawingPriority = false
     var currentPictureColor: Pixel
@@ -67,24 +65,22 @@ class Picture {
     var currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
     let penSizes = PenSizes()
     
-    private var data: NSData
     private var dataPosition = 0
     private var width = 0
     private var height = 0
     private var byteBuffer: UInt8 = 0
     private var prevByte: UInt8 = 0
-    private var agiVersion: Int
     private var isVersion3BitShifting = false
     
-    init(gameData: GameData, data: NSData, id: Int, version: Int) {
-        self.id = id
-        self.gameData = gameData
-        self.data = NSData.init(data: data as Data)
-        self.agiVersion = version
+    override init(gameData: GameData, rawData: NSData, id: Int, version: Int) {
         currentPictureColor = Picture.colorBlack
         currentPriorityColor = Picture.colorBlack
+        
+        super.init(gameData: gameData, rawData: rawData, id: id, version: version)
     }
     
+    // In order to support bit shifting (using only 4 bits to represent colors instead of 8 as a form of compression,
+    // we need our own custom get and peek byte functions
     func getNextByte() -> UInt8 {
         prevByte = byteBuffer
         

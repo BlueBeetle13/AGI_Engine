@@ -10,6 +10,7 @@ import Foundation
 class GameData {
     
     enum FileName: String {
+        case logic = "logdir"
         case pictures = "picdir"
         case view = "viewdir"
         case volume = "vol"
@@ -24,6 +25,7 @@ class GameData {
     private var viewsDirectory: Directory?
     private var soundsDirectory: Directory?
     private let volumes = Volume()
+    private var logic: [Int: Logic] = [:]
     private var pictures: [Int: Picture] = [:]
     private var currentPictureNum = -1
     private var views: [Int: View] = [:]
@@ -68,6 +70,10 @@ class GameData {
             for file in fileList {
                 switch file.lowercased() {
                 
+                // Logic
+                case FileName.logic.rawValue:
+                    logicDirectory = loadDirectoryData(from: "\(path)/\(file)")
+                
                 // Pictures Directory
                 case FileName.pictures.rawValue:
                     picturesDirectory = loadDirectoryData(from: "\(path)/\(file)")
@@ -110,10 +116,9 @@ class GameData {
         
         // Now that we have read in all the files, populate the data structures
         
-        // Get all the picture data from the vol files
+        // Get all the logic, picture and view data from the vol files
+        loadLogicData()
         loadPictureData()
-        
-        // Get all the view data from the vol files
         loadViewData()
         
         // Tell UI load is finished
@@ -198,6 +203,25 @@ class GameData {
         return Directory(path)
     }
     
+    private func loadLogicData() {
+        
+        if let keys = logicDirectory?.items.keys.sorted() {
+            for key in keys {
+                if let directoryItem = logicDirectory?.items[key] {
+                    
+                    Utils.debug("Logic \(key): \(directoryItem.volumeNumber), \(directoryItem.position)")
+                    if let logicData = volumes.getData(version: agiVersion,
+                                                       volumeNumber: directoryItem.volumeNumber,
+                                                       position: directoryItem.position) {
+                        
+                        Utils.debug("Logic \(key) data: \(logicData.length)")
+                        logic[key] = Logic(gameData: self, rawData: logicData, id: key, version: agiVersion)
+                    }
+                }
+            }
+        }
+    }
+    
     private func loadPictureData() {
         
         if let keys = picturesDirectory?.items.keys.sorted() {
@@ -210,7 +234,7 @@ class GameData {
                                                          position: directoryItem.position) {
                         
                         Utils.debug("Picture \(key) data: \(pictureData.length)")
-                        pictures[key] = Picture(gameData: self, data: pictureData, id: key, version: agiVersion)
+                        pictures[key] = Picture(gameData: self, rawData: pictureData, id: key, version: agiVersion)
                     }
                 }
             }
@@ -229,7 +253,7 @@ class GameData {
                                                       position: directoryItem.position) {
                         
                         Utils.debug("View \(key) data: \(viewData.length)")
-                        views[key] = View(gameData: self, compressedData: viewData, id: key, version: agiVersion)
+                        views[key] = View(gameData: self, rawData: viewData, id: key, version: agiVersion)
                     }
                 }
             }

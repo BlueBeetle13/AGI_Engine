@@ -7,7 +7,7 @@
 
 import Foundation
 
-class View {
+class View: Resource {
     
     struct Cell {
         let width: UInt8
@@ -22,38 +22,35 @@ class View {
         let cells: [Cell]
     }
     
-    
-    let id: Int
-    var gameData: GameData
     var loops: [Loop]
     
     private let maxCells = 255
     private let maxLoops = 255
-    private var data: NSData
     private var dataPosition = 0
     
-    private var agiVersion: Int
     private var numberOfLoops: UInt8
     private var descriptionOffset: UInt16
     private var description: String?
     
-    init(gameData: GameData, compressedData: NSData, id: Int, version: Int) {
-        self.id = id
-        self.gameData = gameData
-        self.agiVersion = version
-        
+    override init(gameData: GameData, rawData: NSData, id: Int, version: Int) {
         self.numberOfLoops = 0
         self.descriptionOffset = 0
         self.loops = []
         
         // If this is version 3, the data is compressed with LZW, we need to decompress first
-        if agiVersion == 3 {
-            data = LZWExpand().decompress(input: compressedData)
+        if version == 3 {
+            super.init(gameData: gameData,
+                       rawData: LZWExpand().decompress(input: rawData),
+                       id: id,
+                       version: version)
         }
         
         // Version 2 just uses the data as-is
         else {
-            data = NSData.init(data: compressedData as Data)
+            super.init(gameData: gameData,
+                       rawData: NSData.init(data: rawData as Data),
+                       id: id,
+                       version: version)
         }
         
         Utils.debug("View \(id), Size: \(data.length)")
