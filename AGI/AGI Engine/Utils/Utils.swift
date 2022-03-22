@@ -12,6 +12,21 @@ class Utils {
     //static func debug(_ message: String) { print(message) }
     static func debug(_ message: String) { }
     
+    static func arrayPos(_ x: Int, _ y: Int) -> Int {
+        guard x < GameData.width && y < GameData.height && x >= 0 && y >= 0 else { return 0 }
+        
+        return (Int(y) * GameData.width) + Int(x)
+    }
+    
+    static func drawPixel(buffer: UnsafeMutablePointer<Pixel>, x: Int, y: Int, color: Pixel) {
+        buffer[arrayPos(x * 2, y)] = color
+        buffer[arrayPos((x * 2) + 1, y)] = color
+    }
+    
+    static func getPixel(buffer: UnsafeMutablePointer<Pixel>, x: Int, y: Int) -> Pixel {
+        buffer[arrayPos(x * 2, y)]
+    }
+    
     static func getNextByte(at dataPosition: inout Int, from data: NSData) -> UInt8 {
         var byteBuffer: UInt8 = 0
         

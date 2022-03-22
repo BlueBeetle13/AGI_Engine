@@ -175,10 +175,10 @@ class View {
                 for _ in 0 ..< numPixels {
                     
                     if color != transparentColor {
-                        gameData.drawPixel(buffer: gameData.pictureBuffer,
-                                           x: posX,
-                                           y: posY,
-                                           color: Picture.palette[color])
+                        Utils.drawPixel(buffer: gameData.pictureBuffer,
+                                        x: posX,
+                                        y: posY,
+                                        color: Picture.palette[color])
                     }
                     
                     posX += 1

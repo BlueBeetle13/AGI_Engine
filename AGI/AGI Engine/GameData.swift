@@ -32,19 +32,19 @@ class GameData {
     private var redrawLambda: (() -> Void)? = nil
     
     // Rendering
-    let width = 320
-    let height = 168
+    static let width = 320
+    static let height = 168
     var pictureBuffer: UnsafeMutablePointer<Pixel>
     var priorityBuffer: UnsafeMutablePointer<Pixel>
     var priorityClearBuffer: UnsafeMutablePointer<Pixel>
     
     init() {
-        pictureBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: width * height)
-        priorityBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: width * height)
-        priorityClearBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: width * height)
+        pictureBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity:GameData.width * GameData.height)
+        priorityBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: GameData.width * GameData.height)
+        priorityClearBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: GameData.width * GameData.height)
         
         // Set priority clear buffer to all red
-        for pos in 0 ..< (width * height) {
+        for pos in 0 ..< (GameData.width * GameData.height) {
             priorityClearBuffer[pos] = Picture.colorRed
         }
     }
@@ -126,8 +126,8 @@ class GameData {
             currentPictureNum = id
             
             // Clear the buffers
-            memset(pictureBuffer, 0xFF, width * height * MemoryLayout<Pixel>.size)
-            memcpy(priorityBuffer, priorityClearBuffer, width * height * MemoryLayout<Pixel>.size)
+            memset(pictureBuffer, 0xFF, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
+            memcpy(priorityBuffer, priorityClearBuffer, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
 
             picture.drawToBuffer()
             
@@ -140,8 +140,8 @@ class GameData {
         if currentPictureNum != -1, let picture = pictures[currentPictureNum], let view = views[viewNum] {
             
             // Clear the buffers
-            memset(pictureBuffer, 0xFF, width * height * MemoryLayout<Pixel>.size)
-            memcpy(priorityBuffer, priorityClearBuffer, width * height * MemoryLayout<Pixel>.size)
+            memset(pictureBuffer, 0xFF, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
+            memcpy(priorityBuffer, priorityClearBuffer, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
 
             // Draw the picture
             picture.drawToBuffer()
@@ -234,20 +234,5 @@ class GameData {
                 }
             }
         }
-    }
-    
-    private func arrayPos(_ x: Int, _ y: Int) -> Int {
-        guard x < width && y < height && x >= 0 && y >= 0 else { return 0 }
-        
-        return (Int(y) * width) + Int(x)
-    }
-    
-    func drawPixel(buffer: UnsafeMutablePointer<Pixel>, x: Int, y: Int, color: Pixel) {
-        buffer[arrayPos(x * 2, y)] = color
-        buffer[arrayPos((x * 2) + 1, y)] = color
-    }
-    
-    func getPixel(buffer: UnsafeMutablePointer<Pixel>, x: Int, y: Int) -> Pixel {
-        buffer[arrayPos(x * 2, y)]
     }
 }

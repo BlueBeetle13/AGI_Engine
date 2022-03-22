@@ -79,8 +79,6 @@ class Picture {
     init(gameData: GameData, data: NSData, id: Int, version: Int) {
         self.id = id
         self.gameData = gameData
-        self.width = gameData.width
-        self.height = gameData.height
         self.data = NSData.init(data: data as Data)
         self.agiVersion = version
         currentPictureColor = Picture.colorBlack
@@ -129,11 +127,11 @@ class Picture {
     func drawPixel(x: Int, y: Int) {
         
         if isDrawingPicture {
-            gameData.drawPixel(buffer: gameData.pictureBuffer, x: x, y: y, color: currentPictureColor)
+            Utils.drawPixel(buffer: gameData.pictureBuffer, x: x, y: y, color: currentPictureColor)
         }
         
         if isDrawingPriority {
-            gameData.drawPixel(buffer: gameData.priorityBuffer, x: x, y: y, color: currentPriorityColor)
+            Utils.drawPixel(buffer: gameData.priorityBuffer, x: x, y: y, color: currentPriorityColor)
         }
     }
     
@@ -142,7 +140,7 @@ class Picture {
     }
     
     func getPicturePixel(x: Int, y: Int) -> Pixel {
-        return gameData.getPixel(buffer: gameData.pictureBuffer, x: x, y: y)
+        return Utils.getPixel(buffer: gameData.pictureBuffer, x: x, y: y)
     }
     
     func getPriorityPixel(x: UInt8, y: UInt8) -> Pixel {
@@ -150,7 +148,7 @@ class Picture {
     }
     
     func getPriorityPixel(x: Int, y: Int) -> Pixel {
-        return gameData.getPixel(buffer: gameData.priorityBuffer, x: x, y: y)
+        return Utils.getPixel(buffer: gameData.priorityBuffer, x: x, y: y)
     }
     
     func drawToBuffer() {

@@ -93,16 +93,16 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                                             
                                             // Picture
                                             if let image = NSImage.init(pixels: self.gameData.pictureBuffer,
-                                                                        width: self.gameData.width,
-                                                                        height: self.gameData.height)  {
+                                                                        width: GameData.width,
+                                                                        height: GameData.height)  {
                                                 
                                                 self.screenView.image = image
                                             }
                                             
                                             // Priority
                                             if let image = NSImage.init(pixels: self.gameData.priorityBuffer,
-                                                                        width: self.gameData.width,
-                                                                        height: self.gameData.height)  {
+                                                                        width: GameData.width,
+                                                                        height: GameData.height)  {
                                                 
                                                 self.priorityView.image = image
                                             }
