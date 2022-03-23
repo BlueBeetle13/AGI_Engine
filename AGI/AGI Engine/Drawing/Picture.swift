@@ -65,18 +65,17 @@ class Picture: Resource {
     var currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
     let penSizes = PenSizes()
     
-    private var dataPosition = 0
     private var width = 0
     private var height = 0
     private var byteBuffer: UInt8 = 0
     private var prevByte: UInt8 = 0
     private var isVersion3BitShifting = false
     
-    override init(gameData: GameData, rawData: NSData, id: Int, version: Int) {
+    override init(gameData: GameData, volumeInfo: VolumeInfo, id: Int, version: Int) {
         currentPictureColor = Picture.colorBlack
         currentPriorityColor = Picture.colorBlack
         
-        super.init(gameData: gameData, rawData: rawData, id: id, version: version)
+        super.init(gameData: gameData, volumeInfo: volumeInfo, id: id, version: version)
     }
     
     // In order to support bit shifting (using only 4 bits to represent colors instead of 8 as a form of compression,

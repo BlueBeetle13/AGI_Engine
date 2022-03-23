@@ -7,7 +7,22 @@
 
 import Foundation
 
-class LZWExpand {
+class AvisDurganEncryption {
+    
+    private static let encryptionKeys: [UInt8] = [0x41, 0x76, 0x69, 0x73,
+                                                  0x20, 0x44, 0x75, 0x72,
+                                                  0x67, 0x61, 0x6E] // Avis Durgan
+    
+    static func decrypt(dataPosition: Int, byte: UInt8) -> UInt8 {
+        
+        // Encryption pos cycles through the keys
+        let encryptionKeyPos = dataPosition < encryptionKeys.count ? dataPosition : dataPosition % encryptionKeys.count
+        
+        return byte ^ encryptionKeys[encryptionKeyPos]
+    }
+}
+
+class LZWCompression {
     
     // Special code: end of data code tells us to stop decompressing
     private let codeEndOfData: UInt32 = 257

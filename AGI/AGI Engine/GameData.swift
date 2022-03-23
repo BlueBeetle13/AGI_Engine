@@ -210,12 +210,12 @@ class GameData {
                 if let directoryItem = logicDirectory?.items[key] {
                     
                     Utils.debug("Logic \(key): \(directoryItem.volumeNumber), \(directoryItem.position)")
-                    if let logicData = volumes.getData(version: agiVersion,
+                    if let logicInfo = volumes.getData(version: agiVersion,
                                                        volumeNumber: directoryItem.volumeNumber,
-                                                       position: directoryItem.position) {
+                                                       position: directoryItem.position,
+                                                       type: VolumeType.logic) {
                         
-                        Utils.debug("Logic \(key) data: \(logicData.length)")
-                        logic[key] = Logic(gameData: self, rawData: logicData, id: key, version: agiVersion)
+                        logic[key] = Logic(gameData: self, volumeInfo: logicInfo, id: key, version: agiVersion)
                     }
                 }
             }
@@ -229,12 +229,12 @@ class GameData {
                 if let directoryItem = picturesDirectory?.items[key] {
                     
                     Utils.debug("Picture \(key): \(directoryItem.volumeNumber), \(directoryItem.position)")
-                    if let pictureData = volumes.getData(version: agiVersion,
+                    if let pictureInfo = volumes.getData(version: agiVersion,
                                                          volumeNumber: directoryItem.volumeNumber,
-                                                         position: directoryItem.position) {
+                                                         position: directoryItem.position,
+                                                         type: VolumeType.picture) {
                         
-                        Utils.debug("Picture \(key) data: \(pictureData.length)")
-                        pictures[key] = Picture(gameData: self, rawData: pictureData, id: key, version: agiVersion)
+                        pictures[key] = Picture(gameData: self, volumeInfo: pictureInfo, id: key, version: agiVersion)
                     }
                 }
             }
@@ -248,12 +248,12 @@ class GameData {
                 if let directoryItem = viewsDirectory?.items[key] {
                     
                     Utils.debug("View \(key): \(directoryItem.volumeNumber), \(directoryItem.position)")
-                    if let viewData = volumes.getData(version: agiVersion,
+                    if let viewInfo = volumes.getData(version: agiVersion,
                                                       volumeNumber: directoryItem.volumeNumber,
-                                                      position: directoryItem.position) {
+                                                      position: directoryItem.position,
+                                                      type: VolumeType.view) {
                         
-                        Utils.debug("View \(key) data: \(viewData.length)")
-                        views[key] = View(gameData: self, rawData: viewData, id: key, version: agiVersion)
+                        views[key] = View(gameData: self, volumeInfo: viewInfo, id: key, version: agiVersion)
                     }
                 }
             }

@@ -20,9 +20,6 @@ class Objects {
     
     static func fetchObjects(from path: String) -> [Object] {
         
-        let encryptionKeys: [UInt8] = [0x41, 0x76, 0x69, 0x73,
-                                       0x20, 0x44, 0x75, 0x72,
-                                       0x67, 0x61, 0x6E] // Avis Durgan
         var dataPosition = 0
         var isEncrypted = true
         
@@ -32,13 +29,10 @@ class Objects {
             Utils.debug("Objects: \(path) Total Size: \(data.length)")
             
             func decryptNextByte() -> UInt8 {
-                // Encryption pos cycles through the keys
-                let encryptionKeyPos = dataPosition < encryptionKeys.count ?
-                    dataPosition : dataPosition % encryptionKeys.count
-                
+                let bytePosition = dataPosition
                 let byte = Utils.getNextByte(at: &dataPosition, from: data)
                 
-                return isEncrypted ? byte ^ encryptionKeys[encryptionKeyPos] : byte
+                return isEncrypted ? AvisDurganEncryption.decrypt(dataPosition: bytePosition, byte: byte) : byte
             }
             
             func decryptNextWord() -> UInt16 {

@@ -26,32 +26,17 @@ class View: Resource {
     
     private let maxCells = 255
     private let maxLoops = 255
-    private var dataPosition = 0
     
     private var numberOfLoops: UInt8
     private var descriptionOffset: UInt16
     private var description: String?
     
-    override init(gameData: GameData, rawData: NSData, id: Int, version: Int) {
+    override init(gameData: GameData, volumeInfo: VolumeInfo, id: Int, version: Int) {
         self.numberOfLoops = 0
         self.descriptionOffset = 0
         self.loops = []
         
-        // If this is version 3, the data is compressed with LZW, we need to decompress first
-        if version == 3 {
-            super.init(gameData: gameData,
-                       rawData: LZWExpand().decompress(input: rawData),
-                       id: id,
-                       version: version)
-        }
-        
-        // Version 2 just uses the data as-is
-        else {
-            super.init(gameData: gameData,
-                       rawData: NSData.init(data: rawData as Data),
-                       id: id,
-                       version: version)
-        }
+        super.init(gameData: gameData, volumeInfo: volumeInfo, id: id, version: version)
         
         Utils.debug("View \(id), Size: \(data.length)")
         
