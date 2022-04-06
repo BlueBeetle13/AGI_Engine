@@ -44,90 +44,94 @@ class View: Resource {
         dataPosition = 0
             
         // Unused
-        _ = Utils.getNextByte(at: &dataPosition, from: data)
-        _ = Utils.getNextByte(at: &dataPosition, from: data)
-        
-        numberOfLoops = Utils.getNextByte(at: &dataPosition, from: data)
-        descriptionOffset = UInt16(Utils.getNextWord(at: &dataPosition, from: data))
-        
-        Utils.debug("# Loops: \(numberOfLoops), Description Offset: \(descriptionOffset)")
-        
-        // Get all the loop positions
-        var loopPositions = [UInt16]()
-        for _ in 0 ..< numberOfLoops {
-            loopPositions.append(UInt16(Utils.getNextWord(at: &dataPosition, from: data)))
-        }
-        
-        // Create all the loops
-        for loopPosition in loopPositions {
-            Utils.debug("Loop Position: \(loopPosition)")
+        do {
+            _ = try Utils.getNextByte(at: &dataPosition, from: data)
+            _ = try Utils.getNextByte(at: &dataPosition, from: data)
             
-            dataPosition = Int(loopPosition)
-            var cells = [Cell]()
+            numberOfLoops = try Utils.getNextByte(at: &dataPosition, from: data)
+            descriptionOffset = UInt16(try Utils.getNextWord(at: &dataPosition, from: data))
             
-            let numberOfCells = Utils.getNextByte(at: &dataPosition, from: data)
+            Utils.debug("# Loops: \(numberOfLoops), Description Offset: \(descriptionOffset)")
             
-            Utils.debug("# Cells: \(numberOfCells)")
-            
-            // Get all the cell positions
-            var cellPositions = [UInt16]()
-            for _ in 0 ..< numberOfCells {
-                cellPositions.append(UInt16(Utils.getNextWord(at: &dataPosition, from: data)))
+            // Get all the loop positions
+            var loopPositions = [UInt16]()
+            for _ in 0 ..< numberOfLoops {
+                loopPositions.append(UInt16(try Utils.getNextWord(at: &dataPosition, from: data)))
             }
             
-            // Create all the cells
-            for cellPosition in cellPositions {
-                dataPosition = Int(loopPosition) + Int(cellPosition)
+            // Create all the loops
+            for loopPosition in loopPositions {
+                Utils.debug("Loop Position: \(loopPosition)")
                 
-                let width = Utils.getNextByte(at: &dataPosition, from: data)
-                let height = Utils.getNextByte(at: &dataPosition, from: data)
-                let transparencyAndMirror = Utils.getNextByte(at: &dataPosition, from: data)
+                dataPosition = Int(loopPosition)
+                var cells = [Cell]()
                 
-                // Read in the RLE drawing data
-                var drawingData = [[UInt8]]()
-                for _ in 0 ..< height {
-                    
-                    var rowData = [UInt8]()
-                    
-                    // Read in each row, 0x00 terminated
-                    var byte = Utils.getNextByte(at: &dataPosition, from: data)
-                    while byte != 0x00 {
-                        rowData.append(byte)
-                        byte = Utils.getNextByte(at: &dataPosition, from: data)
-                    }
-                    
-                    drawingData.append(rowData)
+                let numberOfCells = try Utils.getNextByte(at: &dataPosition, from: data)
+                
+                Utils.debug("# Cells: \(numberOfCells)")
+                
+                // Get all the cell positions
+                var cellPositions = [UInt16]()
+                for _ in 0 ..< numberOfCells {
+                    cellPositions.append(UInt16(try Utils.getNextWord(at: &dataPosition, from: data)))
                 }
                 
+                // Create all the cells
+                for cellPosition in cellPositions {
+                    dataPosition = Int(loopPosition) + Int(cellPosition)
+                    
+                    let width = try Utils.getNextByte(at: &dataPosition, from: data)
+                    let height = try Utils.getNextByte(at: &dataPosition, from: data)
+                    let transparencyAndMirror = try Utils.getNextByte(at: &dataPosition, from: data)
+                    
+                    // Read in the RLE drawing data
+                    var drawingData = [[UInt8]]()
+                    for _ in 0 ..< height {
+                        
+                        var rowData = [UInt8]()
+                        
+                        // Read in each row, 0x00 terminated
+                        var byte = try Utils.getNextByte(at: &dataPosition, from: data)
+                        while byte != 0x00 {
+                            rowData.append(byte)
+                            byte = try Utils.getNextByte(at: &dataPosition, from: data)
+                        }
+                        
+                        drawingData.append(rowData)
+                    }
+                    
+                    
+                    let cell = Cell(width: width,
+                                    height: height,
+                                    transparencyAndMirror: transparencyAndMirror,
+                                    drawingData: drawingData)
+                    cells.append(cell)
+                }
                 
-                let cell = Cell(width: width,
-                                height: height,
-                                transparencyAndMirror: transparencyAndMirror,
-                                drawingData: drawingData)
-                cells.append(cell)
+                // Add the loop and its cells
+                loops.append(Loop(numberOfCells: numberOfCells,
+                                  cells: cells))
             }
             
-            // Add the loop and its cells
-            loops.append(Loop(numberOfCells: numberOfCells,
-                              cells: cells))
-        }
-        
-        // Get the description if it exists
-        if descriptionOffset > 0 {
-            dataPosition = Int(descriptionOffset)
-            
-            // Keep reading in, until null byte is reached
-            var byte = Utils.getNextByte(at: &dataPosition, from: data)
-            var letters = ""
-            while (byte != 0x00) {
-                let letter = String(format: "%c", byte)
-                letters.append(letter)
+            // Get the description if it exists
+            if descriptionOffset > 0 {
+                dataPosition = Int(descriptionOffset)
                 
-                byte = Utils.getNextByte(at: &dataPosition, from: data)
+                // Keep reading in, until null byte is reached
+                var byte = try Utils.getNextByte(at: &dataPosition, from: data)
+                var letters = ""
+                while (byte != 0x00) {
+                    let letter = String(format: "%c", byte)
+                    letters.append(letter)
+                    
+                    byte = try Utils.getNextByte(at: &dataPosition, from: data)
+                }
+                
+                description = letters
+                Utils.debug("Description Text: \(letters)")
             }
-            
-            description = letters
-            Utils.debug("Description Text: \(letters)")
+        } catch {
+            Utils.debug("View: EndOfData")
         }
     }
     

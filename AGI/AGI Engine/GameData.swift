@@ -33,6 +33,10 @@ class GameData {
     private var objects: [Object] = []
     private var redrawLambda: (() -> Void)? = nil
     
+    // Game Data
+    var variables = [UInt8]()
+    var flags = [UInt8]()
+    
     // Rendering
     static let width = 320
     static let height = 168
@@ -168,34 +172,38 @@ class GameData {
             
             agiVersion = 3
             
-            let logicDirectoryStart = Utils.getNextWord(at: &dataPosition, from: data)
-            let pictureDirectoryStart = Utils.getNextWord(at: &dataPosition, from: data)
-            let viewDirectoryStart = Utils.getNextWord(at: &dataPosition, from: data)
-            let soundDirectoryStart = Utils.getNextWord(at: &dataPosition, from: data)
-            
-            // Logic
-            let logicData = data.subdata(with: NSRange(location: logicDirectoryStart,
-                                                       length: pictureDirectoryStart - logicDirectoryStart))
-            logicDirectory = Directory(logicData as NSData)
-            
-            // Pictures
-            let pictureData = data.subdata(with: NSRange(location: pictureDirectoryStart,
-                                                         length: viewDirectoryStart - pictureDirectoryStart))
-            picturesDirectory = Directory(pictureData as NSData)
-            
-            // View
-            let viewData = data.subdata(with: NSRange(location: viewDirectoryStart,
-                                                      length: soundDirectoryStart - viewDirectoryStart))
-            viewsDirectory = Directory(viewData as NSData)
-            
-            // Sound
-            var soundDirectoryLength = data.length - soundDirectoryStart
-            if soundDirectoryLength > 256 * 3 {
-                soundDirectoryLength = 256 * 3
+            do {
+                let logicDirectoryStart = try Utils.getNextWord(at: &dataPosition, from: data)
+                let pictureDirectoryStart = try Utils.getNextWord(at: &dataPosition, from: data)
+                let viewDirectoryStart = try Utils.getNextWord(at: &dataPosition, from: data)
+                let soundDirectoryStart = try Utils.getNextWord(at: &dataPosition, from: data)
+                
+                // Logic
+                let logicData = data.subdata(with: NSRange(location: logicDirectoryStart,
+                                                           length: pictureDirectoryStart - logicDirectoryStart))
+                logicDirectory = Directory(logicData as NSData)
+                
+                // Pictures
+                let pictureData = data.subdata(with: NSRange(location: pictureDirectoryStart,
+                                                             length: viewDirectoryStart - pictureDirectoryStart))
+                picturesDirectory = Directory(pictureData as NSData)
+                
+                // View
+                let viewData = data.subdata(with: NSRange(location: viewDirectoryStart,
+                                                          length: soundDirectoryStart - viewDirectoryStart))
+                viewsDirectory = Directory(viewData as NSData)
+                
+                // Sound
+                var soundDirectoryLength = data.length - soundDirectoryStart
+                if soundDirectoryLength > 256 * 3 {
+                    soundDirectoryLength = 256 * 3
+                }
+                let soundData = data.subdata(with: NSRange(location: soundDirectoryStart,
+                                                           length: soundDirectoryLength))
+                soundsDirectory = Directory(soundData as NSData)
+            } catch {
+                Utils.debug("GameData loadAllFilesDirectoryData: EndOfData")
             }
-            let soundData = data.subdata(with: NSRange(location: soundDirectoryStart,
-                                                       length: soundDirectoryLength))
-            soundsDirectory = Directory(soundData as NSData)
         }
     }
     

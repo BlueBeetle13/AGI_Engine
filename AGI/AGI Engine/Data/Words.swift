@@ -33,35 +33,40 @@ class Words {
             var letters: String = ""
             
             // Start fetching characters until we fine the end of file word
-            while dataPosition < data.length {
-                
-                var letterPos = 0
-                
-                // Get the letter count for reusing the letter of the previous word.
-                // This will be 0 when we start a new letter
-                let reuseLetterCount = Int(Utils.getNextByte(at: &dataPosition, from: data))
-                
-                // Get the first letter of the word, and continue getting letters until we reach the 0x00 character
-                var byte = Utils.getNextByte(at: &dataPosition, from: data)
-                while letterPos < maxWordCharacters && byte != 0x00 && byte != 0x01 {
-
-                    // Decrpyt the letter and add to the text
-                    let letter = String(format: "%c", ((byte ^ 0x7F) & 0x7F))
-                    letters.append(letter)
+            do {
+                while dataPosition < data.length {
                     
-                    byte = Utils.getNextByte(at: &dataPosition, from: data)
-                    letterPos += 1
+                    var letterPos = 0
+                    
+                    // Get the letter count for reusing the letter of the previous word.
+                    // This will be 0 when we start a new letter
+                    let reuseLetterCount = Int(try Utils.getNextByte(at: &dataPosition, from: data))
+                    
+                    // Get the first letter of the word, and continue getting letters until we reach the 0x00 character
+                    var byte = try Utils.getNextByte(at: &dataPosition, from: data)
+                    while letterPos < maxWordCharacters && byte != 0x00 && byte != 0x01 {
+                        
+                        // Decrpyt the letter and add to the text
+                        let letter = String(format: "%c", ((byte ^ 0x7F) & 0x7F))
+                        letters.append(letter)
+                        
+                        byte = try Utils.getNextByte(at: &dataPosition, from: data)
+                        letterPos += 1
+                    }
+                    
+                    // Now get the WordId
+                    let word = try Utils.getNextByte(at: &dataPosition, from: data)
+                    let wordId = (UInt16(byte) << 8) + UInt16(word)
+                    
+                    // We finished getting the word, combine with the reused letters of the previous word
+                    let text = "\(previousWord.prefix(reuseLetterCount))\(letters)"
+                    words.append(Word(wordId: wordId, text: text))
+                    
+                    previousWord = text
+                    letters = ""
                 }
-                
-                // Now get the WordId
-                let wordId = (UInt16(byte) << 8) + UInt16(Utils.getNextByte(at: &dataPosition, from: data))
-                
-                // We finished getting the word, combine with the reused letters of the previous word
-                let text = "\(previousWord.prefix(reuseLetterCount))\(letters)"
-                words.append(Word(wordId: wordId, text: text))
-                    
-                previousWord = text
-                letters = ""
+            } catch {
+                Utils.debug("Words: EndOfData")
             }
         }
         

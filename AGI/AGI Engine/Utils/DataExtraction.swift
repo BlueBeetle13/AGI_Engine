@@ -117,7 +117,7 @@ class LZWCompression {
             }
         }
         
-        Utils.debug("Decompressed: \(outputByteArray.count) from: \(inputByteArray.count)")
+        Utils.debug("Decompressed: \(outputByteArray.count) from: \(input.length)")
         
         return NSData(bytes: outputByteArray, length: outputByteArray.count)
     }

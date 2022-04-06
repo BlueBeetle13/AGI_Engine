@@ -23,7 +23,7 @@ class Resource {
         
         // If this is version 3, and this is not a picture resource,
         // the data is compressed with LZW. We need to decompress first
-        if version == 3, volumeInfo.type != VolumeType.picture {
+        if version == 3, volumeInfo.compressedLength < volumeInfo.length, volumeInfo.type != VolumeType.picture {
             self.data = LZWCompression().decompress(input: volumeInfo.data)
         }
         
