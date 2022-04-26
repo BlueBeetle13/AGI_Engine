@@ -10,15 +10,13 @@ import Foundation
 class Resource {
     
     let id: Int
-    var gameData: GameData
     var agiVersion: Int
     var data: NSData
     
     var dataPosition = 0
     
-    init(gameData: GameData, volumeInfo: VolumeInfo, id: Int, version: Int) {
+    init(volumeInfo: VolumeInfo, id: Int, version: Int) {
         self.id = id
-        self.gameData = gameData
         self.agiVersion = version
         
         // If this is version 3, and this is not a picture resource,

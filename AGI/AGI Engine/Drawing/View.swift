@@ -31,12 +31,12 @@ class View: Resource {
     private var descriptionOffset: UInt16
     private var description: String?
     
-    override init(gameData: GameData, volumeInfo: VolumeInfo, id: Int, version: Int) {
+    override init(volumeInfo: VolumeInfo, id: Int, version: Int) {
         self.numberOfLoops = 0
         self.descriptionOffset = 0
         self.loops = []
         
-        super.init(gameData: gameData, volumeInfo: volumeInfo, id: id, version: version)
+        super.init(volumeInfo: volumeInfo, id: id, version: version)
         
         Utils.debug("View \(id), Size: \(data.length)")
         
@@ -135,7 +135,13 @@ class View: Resource {
         }
     }
     
-    func drawView(loopNum: Int, cellNum: Int) {
+    func drawView(pictureBuffer: UnsafeMutablePointer<Pixel>,
+                  priorityBuffer: UnsafeMutablePointer<Pixel>,
+                  posX: Int,
+                  posY: Int,
+                  loopNum: Int,
+                  cellNum: Int) {
+        
         guard loopNum < loops.count, cellNum < loops[loopNum].cells.count else {
             Utils.debug("Invalid View: \(loopNum), \(cellNum)")
             return
@@ -143,8 +149,8 @@ class View: Resource {
         
         Utils.debug("Draw View: \(id), \(loopNum), \(cellNum)")
         
-        var posX = 0
-        var posY = 0
+        var pixelPosX = posX
+        var pixelPosY = posY
         
         let cell = loops[loopNum].cells[cellNum]
         
@@ -161,18 +167,18 @@ class View: Resource {
                 for _ in 0 ..< numPixels {
                     
                     if color != transparentColor {
-                        Utils.drawPixel(buffer: gameData.pictureBuffer,
-                                        x: posX,
-                                        y: posY,
+                        Utils.drawPixel(buffer: pictureBuffer,
+                                        x: pixelPosX,
+                                        y: pixelPosY,
                                         color: Picture.palette[color])
                     }
                     
-                    posX += 1
+                    pixelPosX += 1
                 }
             }
             
-            posX = 0
-            posY += 1
+            pixelPosX = 0
+            pixelPosY += 1
         }
     }
 }

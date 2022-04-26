@@ -199,17 +199,17 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                                                       makeIfNecessary: false) as? NSTableCellView {
                     
                     // Extract the view info
-                    var viewNum = 0
+                    var viewId = 0
                     var loopNum = 0
                     var cellNum = 0
                     if let itemsArray = viewInfo.textField?.stringValue.split(separator: " "), itemsArray.count == 3 {
                         
-                        viewNum = (itemsArray[0].split(separator: ":").last as NSString?)?.integerValue ?? 0
+                        viewId = (itemsArray[0].split(separator: ":").last as NSString?)?.integerValue ?? 0
                         loopNum = (itemsArray[1].split(separator: ":").last as NSString?)?.integerValue ?? 0
                         cellNum = (itemsArray[2].split(separator: ":").last as NSString?)?.integerValue ?? 0
                         
-                        print("Selected: \(viewNum), \(loopNum), \(cellNum)")
-                        gameData.drawView(viewNum: viewNum, loopNum: loopNum, cellNum: cellNum)
+                        print("Selected: \(viewId), \(loopNum), \(cellNum)")
+                        gameData.drawView(viewId, loopNum, cellNum)
                     }
                 }
             }

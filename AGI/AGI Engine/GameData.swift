@@ -18,115 +18,57 @@ class GameData {
         case words = "words.tok"
     }
     let allFilesDirectories = ["mh2dir", "mhdir", "grdir", "kq4dir"]
-    
-    private var agiVersion = 2
-    private var logicDirectory: Directory?
-    private var picturesDirectory: Directory?
-    private var viewsDirectory: Directory?
-    private var soundsDirectory: Directory?
-    private let volumes = Volume()
-    private var logic: [Int: Logic] = [:]
-    private var pictures: [Int: Picture] = [:]
+
     private var currentPictureNum = -1
-    private var views: [Int: View] = [:]
-    private var words: [Word] = []
-    private var objects: [Object] = []
-    private var redrawLambda: (() -> Void)? = nil
-    
-    // Game Data
-    var variables = [UInt8]()
-    var flags = [UInt8]()
+    var agiVersion = 2
+    var logicDirectory: Directory?
+    var picturesDirectory: Directory?
+    var viewsDirectory: Directory?
+    var soundsDirectory: Directory?
+    let volumes = Volume()
+    var logic: [Int: Logic] = [:]
+    var pictures: [Int: Picture] = [:]
+    var views: [Int: View] = [:]
+    var words: [Word] = []
+    var objects: [Object] = []
+    var redrawLambda: (() -> Void)? = nil
     
     // Rendering
     static let width = 320
     static let height = 168
     var pictureBuffer: UnsafeMutablePointer<Pixel>
     var priorityBuffer: UnsafeMutablePointer<Pixel>
-    var priorityClearBuffer: UnsafeMutablePointer<Pixel>
     
     init() {
+        
+        // Rendering
         pictureBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity:GameData.width * GameData.height)
         priorityBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: GameData.width * GameData.height)
-        priorityClearBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: GameData.width * GameData.height)
-        
-        // Set priority clear buffer to all red
-        for pos in 0 ..< (GameData.width * GameData.height) {
-            priorityClearBuffer[pos] = Picture.colorRed
-        }
     }
     
-    func loadGameData(from path: String,
-                      loadFinished: ([Int: Picture], [Int: View]) -> Void,
-                      redraw: @escaping () -> Void) {
-        do {
-            agiVersion = 2
-            picturesDirectory = nil
-            viewsDirectory = nil
-            volumes.clear()
-            pictures.removeAll()
-            views.removeAll()
-            objects.removeAll()
-            words.removeAll()
-            redrawLambda = redraw
+    func playRoom(roomNumber: UInt8) {
+        
+        guard let logic = logic[Int(roomNumber)] else {
+            Utils.debug("Missing Room info; \(roomNumber)")
+            return
+        }
+        
+        Logic.setNewRoomGameState(roomNumber: roomNumber)
+        
+        let drawGraphics = { [weak self] (pictureId: Int, viewId: Int, viewLoopNum: Int, viewCellNum: Int) in
             
-            let fileList = try FileManager.default.contentsOfDirectory(atPath: path)
-            
-            for file in fileList {
-                switch file.lowercased() {
-                
-                // Logic
-                case FileName.logic.rawValue:
-                    logicDirectory = loadDirectoryData(from: "\(path)/\(file)")
-                
-                // Pictures Directory
-                case FileName.pictures.rawValue:
-                    picturesDirectory = loadDirectoryData(from: "\(path)/\(file)")
-                    
-                // View Directory
-                case FileName.view.rawValue:
-                    viewsDirectory = loadDirectoryData(from: "\(path)/\(file)")
-                    
-                // Words
-                case FileName.words.rawValue:
-                    words = Words.fetchWords(from: "\(path)/\(file)")
-                    
-                // Objects
-                case FileName.objects.rawValue:
-                    objects = Objects.fetchObjects(from: "\(path)/\(file)")
-                    
-                // Multiple files
-                default:
-                    
-                    let fileParts = file.lowercased().split(separator: ".")
-                    
-                    // Volumes
-                    if fileParts.first?.hasSuffix(FileName.volume.rawValue) ?? false, let ext = fileParts.last {
-                        volumes.addFile(String(ext), "\(path)/\(file)")
-                    }
-                    
-                    // All files directory
-                    else if allFilesDirectories.contains(file.lowercased()) {
-                        loadAllFilesDirectoryData("\(path)/\(file)")
-                    }
-                    
-                    // Unknown
-                    else {
-                        Utils.debug("Uknown file: \(file)")
-                    }
-                }
+            // Picure
+            if pictureId != -1 {
+                self?.drawPicture(id: pictureId)
             }
-    
-        } catch { Utils.debug("Error getting file list: \(error)")}
+            
+            // View
+            else if viewId != -1 {
+                self?.drawView(viewId, viewLoopNum, viewCellNum)
+            }
+        }
         
-        // Now that we have read in all the files, populate the data structures
-        
-        // Get all the logic, picture and view data from the vol files
-        loadLogicData()
-        loadPictureData()
-        loadViewData()
-        
-        // Tell UI load is finished
-        loadFinished(pictures, views)
+        logic.executeLogic(drawGraphics)
     }
     
     func drawPicture(id: Int) {
@@ -134,137 +76,28 @@ class GameData {
             
             currentPictureNum = id
             
-            // Clear the buffers
-            memset(pictureBuffer, 0xFF, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
-            memcpy(priorityBuffer, priorityClearBuffer, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
-
-            picture.drawToBuffer()
+            picture.drawToBuffer(pictureBuffer, priorityBuffer)
             
             redrawLambda?()
         }
     }
     
-    func drawView(viewNum: Int, loopNum: Int, cellNum: Int) {
+    func drawView(_ viewId: Int, _ loopNum: Int, _ cellNum: Int) {
         
-        if currentPictureNum != -1, let picture = pictures[currentPictureNum], let view = views[viewNum] {
+        if currentPictureNum != -1, let picture = pictures[currentPictureNum], let view = views[viewId] {
             
-            // Clear the buffers
-            memset(pictureBuffer, 0xFF, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
-            memcpy(priorityBuffer, priorityClearBuffer, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
-
             // Draw the picture
-            picture.drawToBuffer()
+            picture.drawToBuffer(pictureBuffer, priorityBuffer)
             
             // Draw the view
-            view.drawView(loopNum: loopNum, cellNum: cellNum)
+            view.drawView(pictureBuffer: pictureBuffer,
+                          priorityBuffer: priorityBuffer,
+                          posX: 0,
+                          posY: 0,
+                          loopNum: loopNum,
+                          cellNum: cellNum)
             
             redrawLambda?()
-            
-        }
-    }
-    
-    private func loadAllFilesDirectoryData(_ path: String) {
-        
-        // Load the file to get the header and locations of the individual directories
-        if let data = NSData(contentsOfFile: path) {
-            
-            var dataPosition = 0
-            
-            agiVersion = 3
-            
-            do {
-                let logicDirectoryStart = try Utils.getNextWord(at: &dataPosition, from: data)
-                let pictureDirectoryStart = try Utils.getNextWord(at: &dataPosition, from: data)
-                let viewDirectoryStart = try Utils.getNextWord(at: &dataPosition, from: data)
-                let soundDirectoryStart = try Utils.getNextWord(at: &dataPosition, from: data)
-                
-                // Logic
-                let logicData = data.subdata(with: NSRange(location: logicDirectoryStart,
-                                                           length: pictureDirectoryStart - logicDirectoryStart))
-                logicDirectory = Directory(logicData as NSData)
-                
-                // Pictures
-                let pictureData = data.subdata(with: NSRange(location: pictureDirectoryStart,
-                                                             length: viewDirectoryStart - pictureDirectoryStart))
-                picturesDirectory = Directory(pictureData as NSData)
-                
-                // View
-                let viewData = data.subdata(with: NSRange(location: viewDirectoryStart,
-                                                          length: soundDirectoryStart - viewDirectoryStart))
-                viewsDirectory = Directory(viewData as NSData)
-                
-                // Sound
-                var soundDirectoryLength = data.length - soundDirectoryStart
-                if soundDirectoryLength > 256 * 3 {
-                    soundDirectoryLength = 256 * 3
-                }
-                let soundData = data.subdata(with: NSRange(location: soundDirectoryStart,
-                                                           length: soundDirectoryLength))
-                soundsDirectory = Directory(soundData as NSData)
-            } catch {
-                Utils.debug("GameData loadAllFilesDirectoryData: EndOfData")
-            }
-        }
-    }
-    
-    private func loadDirectoryData(from path: String) -> Directory? {
-        return Directory(path)
-    }
-    
-    private func loadLogicData() {
-        
-        if let keys = logicDirectory?.items.keys.sorted() {
-            for key in keys {
-                if let directoryItem = logicDirectory?.items[key] {
-                    
-                    Utils.debug("Logic \(key): \(directoryItem.volumeNumber), \(directoryItem.position)")
-                    if let logicInfo = volumes.getData(version: agiVersion,
-                                                       volumeNumber: directoryItem.volumeNumber,
-                                                       position: directoryItem.position,
-                                                       type: VolumeType.logic) {
-                        
-                        logic[key] = Logic(gameData: self, volumeInfo: logicInfo, id: key, version: agiVersion)
-                    }
-                }
-            }
-        }
-    }
-    
-    private func loadPictureData() {
-        
-        if let keys = picturesDirectory?.items.keys.sorted() {
-            for key in keys {
-                if let directoryItem = picturesDirectory?.items[key] {
-                    
-                    Utils.debug("Picture \(key): \(directoryItem.volumeNumber), \(directoryItem.position)")
-                    if let pictureInfo = volumes.getData(version: agiVersion,
-                                                         volumeNumber: directoryItem.volumeNumber,
-                                                         position: directoryItem.position,
-                                                         type: VolumeType.picture) {
-                        
-                        pictures[key] = Picture(gameData: self, volumeInfo: pictureInfo, id: key, version: agiVersion)
-                    }
-                }
-            }
-        }
-    }
-    
-    private func loadViewData() {
-        
-        if let keys = viewsDirectory?.items.keys.sorted() {
-            for key in keys {
-                if let directoryItem = viewsDirectory?.items[key] {
-                    
-                    Utils.debug("View \(key): \(directoryItem.volumeNumber), \(directoryItem.position)")
-                    if let viewInfo = volumes.getData(version: agiVersion,
-                                                      volumeNumber: directoryItem.volumeNumber,
-                                                      position: directoryItem.position,
-                                                      type: VolumeType.view) {
-                        
-                        views[key] = View(gameData: self, volumeInfo: viewInfo, id: key, version: agiVersion)
-                    }
-                }
-            }
         }
     }
 }

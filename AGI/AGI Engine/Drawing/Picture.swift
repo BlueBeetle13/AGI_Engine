@@ -65,17 +65,30 @@ class Picture: Resource {
     var currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
     let penSizes = PenSizes()
     
+    private var isDrawn = false
+    private var pictureBuffer: UnsafeMutablePointer<Pixel>
+    private var priorityBuffer: UnsafeMutablePointer<Pixel>
     private var width = 0
     private var height = 0
     private var byteBuffer: UInt8 = 0
     private var prevByte: UInt8 = 0
     private var isVersion3BitShifting = false
     
-    override init(gameData: GameData, volumeInfo: VolumeInfo, id: Int, version: Int) {
+    override init(volumeInfo: VolumeInfo, id: Int, version: Int) {
         currentPictureColor = Picture.colorBlack
         currentPriorityColor = Picture.colorBlack
         
-        super.init(gameData: gameData, volumeInfo: volumeInfo, id: id, version: version)
+        // Create buffers
+        pictureBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: GameData.width * GameData.height)
+        priorityBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: GameData.width * GameData.height)
+        
+        // Clear buffers with proper background color
+        memset(pictureBuffer, 0xFF, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
+        for pos in 0 ..< (GameData.width * GameData.height) {
+            priorityBuffer[pos] = Picture.colorRed
+        }
+        
+        super.init(volumeInfo: volumeInfo, id: id, version: version)
     }
     
     // In order to support bit shifting (using only 4 bits to represent colors instead of 8 as a form of compression,
@@ -122,11 +135,11 @@ class Picture: Resource {
     func drawPixel(x: Int, y: Int) {
         
         if isDrawingPicture {
-            Utils.drawPixel(buffer: gameData.pictureBuffer, x: x, y: y, color: currentPictureColor)
+            Utils.drawPixel(buffer: pictureBuffer, x: x, y: y, color: currentPictureColor)
         }
         
         if isDrawingPriority {
-            Utils.drawPixel(buffer: gameData.priorityBuffer, x: x, y: y, color: currentPriorityColor)
+            Utils.drawPixel(buffer: priorityBuffer, x: x, y: y, color: currentPriorityColor)
         }
     }
     
@@ -135,7 +148,7 @@ class Picture: Resource {
     }
     
     func getPicturePixel(x: Int, y: Int) -> Pixel {
-        return Utils.getPixel(buffer: gameData.pictureBuffer, x: x, y: y)
+        return Utils.getPixel(buffer: pictureBuffer, x: x, y: y)
     }
     
     func getPriorityPixel(x: UInt8, y: UInt8) -> Pixel {
@@ -143,10 +156,10 @@ class Picture: Resource {
     }
     
     func getPriorityPixel(x: Int, y: Int) -> Pixel {
-        return Utils.getPixel(buffer: gameData.priorityBuffer, x: x, y: y)
+        return Utils.getPixel(buffer: priorityBuffer, x: x, y: y)
     }
     
-    func drawToBuffer() {
+    func drawToBuffer(_ gamePictureBuffer: UnsafeMutablePointer<Pixel>, _ gamePriorityBuffer: UnsafeMutablePointer<Pixel>) {
         dataPosition = 0
         byteBuffer = 0
         prevByte = 0
@@ -157,54 +170,63 @@ class Picture: Resource {
         currentPenType = PenType(isSolid: true, isRectangle: true, penSize: 0)
         isVersion3BitShifting = false
         
-        while dataPosition < data.length {
-
-            let byte = getNextByte()
-            if let pictureAction = PictureAction(rawValue: byte) {
+        // First draw to this buffer, if we haven't already
+        if !isDrawn {
+            while dataPosition < data.length {
                 
-                // Get the picture action
-                switch pictureAction {
-                case PictureAction.changePictureColorEnablePictureDraw:
-                    changePictureColorEnablePictureDraw()
+                let byte = getNextByte()
+                if let pictureAction = PictureAction(rawValue: byte) {
                     
-                case PictureAction.disablePictureDraw:
-                    disablePictureDraw()
+                    // Get the picture action
+                    switch pictureAction {
+                    case PictureAction.changePictureColorEnablePictureDraw:
+                        changePictureColorEnablePictureDraw()
+                        
+                    case PictureAction.disablePictureDraw:
+                        disablePictureDraw()
+                        
+                    case PictureAction.changePriorityColorEnablePictureDraw:
+                        changePictureColorEnablePriorityDraw()
+                        
+                    case PictureAction.disablePriorityDraw:
+                        disablePriorityDraw()
+                        
+                    case PictureAction.drawYCorner:
+                        drawCornerLine(isYDirection: true)
+                        
+                    case PictureAction.drawXCorner:
+                        drawCornerLine(isYDirection: false)
+                        
+                    case PictureAction.drawAbsoluteLine:
+                        drawAbsoluteLine()
+                        
+                    case PictureAction.drawRelativeLine:
+                        drawRelativeLine()
+                        
+                    case PictureAction.fill:
+                        fill()
+                        
+                    case PictureAction.changePenSizeAndStyle:
+                        changePenSizeAndStyle()
+                        
+                    case PictureAction.plotWithPen:
+                        plotWithPen()
+                        
+                    case PictureAction.endOfPicture:
+                        Utils.debug("End of Picture: \(dataPosition)")
+                    }
                     
-                case PictureAction.changePriorityColorEnablePictureDraw:
-                    changePictureColorEnablePriorityDraw()
-                    
-                case PictureAction.disablePriorityDraw:
-                    disablePriorityDraw()
-                    
-                case PictureAction.drawYCorner:
-                    drawCornerLine(isYDirection: true)
-                    
-                case PictureAction.drawXCorner:
-                    drawCornerLine(isYDirection: false)
-                    
-                case PictureAction.drawAbsoluteLine:
-                    drawAbsoluteLine()
-                    
-                case PictureAction.drawRelativeLine:
-                    drawRelativeLine()
-                    
-                case PictureAction.fill:
-                    fill()
-                    
-                case PictureAction.changePenSizeAndStyle:
-                    changePenSizeAndStyle()
-                    
-                case PictureAction.plotWithPen:
-                    plotWithPen()
-                    
-                case PictureAction.endOfPicture:
-                    Utils.debug("End of Picture: \(dataPosition)")
+                } else {
+                    Utils.debug("Unknown Picture Action: \(byte)")
                 }
-                
-            } else {
-                Utils.debug("Unknown Picture Action: \(byte)")
             }
+            
+            isDrawn = true
         }
+        
+        // Copy over the buffers
+        memcpy(gamePictureBuffer, pictureBuffer, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
+        memcpy(gamePriorityBuffer, priorityBuffer, GameData.width * GameData.height * MemoryLayout<Pixel>.size)
     }
     
     private func changePictureColorEnablePictureDraw() {
