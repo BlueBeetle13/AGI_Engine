@@ -10,7 +10,7 @@ import Foundation
 extension GameData {
     
     func loadGameData(from path: String,
-                      loadFinished: ([Int: Picture], [Int: View]) -> Void,
+                      loadFinished: ([Int: Picture], [Int: View], [Int: Logic]) -> Void,
                       redraw: @escaping () -> Void) {
         do {
             agiVersion = 2
@@ -19,7 +19,7 @@ extension GameData {
             volumes.clear()
             pictures.removeAll()
             views.removeAll()
-            objects.removeAll()
+            inventoryItems.removeAll()
             words.removeAll()
             redrawLambda = redraw
             
@@ -46,7 +46,7 @@ extension GameData {
                     
                 // Objects
                 case FileName.objects.rawValue:
-                    objects = Objects.fetchObjects(from: "\(path)/\(file)")
+                    inventoryItems = Inventory.fetchInventoryItems(from: "\(path)/\(file)")
                     
                 // Multiple files
                 default:
@@ -80,9 +80,7 @@ extension GameData {
         loadViewData()
         
         // Tell UI load is finished
-        loadFinished(pictures, views)
-        
-        playRoom(roomNumber: 140)
+        loadFinished(pictures, views, logic)
     }
     
     func loadAllFilesDirectoryData(_ path: String) {

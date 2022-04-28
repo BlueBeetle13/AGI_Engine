@@ -33,7 +33,7 @@
 		4A88746527DE8BB600B0F62F /* DataExtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A88746427DE8BB600B0F62F /* DataExtraction.swift */; };
 		4AAC8B8C27E969C000D00FF4 /* Logic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAC8B8B27E969C000D00FF4 /* Logic.swift */; };
 		4AAC8B9127E96A1B00D00FF4 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAC8B9027E96A1B00D00FF4 /* Resource.swift */; };
-		4AFBAA3227D5A88900193D77 /* Objects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFBAA3127D5A88900193D77 /* Objects.swift */; };
+		4AFBAA3227D5A88900193D77 /* Inventory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFBAA3127D5A88900193D77 /* Inventory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,7 +87,7 @@
 		4A88746427DE8BB600B0F62F /* DataExtraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtraction.swift; sourceTree = "<group>"; };
 		4AAC8B8B27E969C000D00FF4 /* Logic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logic.swift; sourceTree = "<group>"; };
 		4AAC8B9027E96A1B00D00FF4 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
-		4AFBAA3127D5A88900193D77 /* Objects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Objects.swift; sourceTree = "<group>"; };
+		4AFBAA3127D5A88900193D77 /* Inventory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inventory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,7 +147,7 @@
 			children = (
 				4A691AD627C73849001352E9 /* Directory.swift */,
 				4A691ADE27C74F1C001352E9 /* Volume.swift */,
-				4AFBAA3127D5A88900193D77 /* Objects.swift */,
+				4AFBAA3127D5A88900193D77 /* Inventory.swift */,
 				4A28412F27D409D600F61AD0 /* Words.swift */,
 			);
 			path = Data;
@@ -377,7 +377,7 @@
 				4A28413527D552CE00F61AD0 /* Utils.swift in Sources */,
 				4A13154827D2BC440098908E /* Picture+Pen.swift in Sources */,
 				4A691AD727C73849001352E9 /* Directory.swift in Sources */,
-				4AFBAA3227D5A88900193D77 /* Objects.swift in Sources */,
+				4AFBAA3227D5A88900193D77 /* Inventory.swift in Sources */,
 				4A28413027D409D600F61AD0 /* Words.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

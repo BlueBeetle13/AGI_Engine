@@ -30,7 +30,7 @@ class GameData {
     var pictures: [Int: Picture] = [:]
     var views: [Int: View] = [:]
     var words: [Word] = []
-    var objects: [Object] = []
+    var inventoryItems: [InventoryItem] = []
     var redrawLambda: (() -> Void)? = nil
     
     // Rendering
@@ -53,9 +53,16 @@ class GameData {
             return
         }
         
+        print("Play Room: \(roomNumber)")
+        
         Logic.setNewRoomGameState(roomNumber: roomNumber)
         
-        let drawGraphics = { [weak self] (pictureId: Int, viewId: Int, viewLoopNum: Int, viewCellNum: Int) in
+        let drawGraphics = { [weak self] (pictureId: Int,
+                                          viewId: Int,
+                                          viewLoopNum: Int,
+                                          viewCellNum: Int,
+                                          redrawScreen: Bool) in
+            print("Draw: \(pictureId), \(viewId), \(redrawScreen)")
             
             // Picure
             if pictureId != -1 {
@@ -65,6 +72,11 @@ class GameData {
             // View
             else if viewId != -1 {
                 self?.drawView(viewId, viewLoopNum, viewCellNum)
+            }
+            
+            // Redraw
+            if redrawScreen {
+                self?.redrawLambda?()
             }
         }
         

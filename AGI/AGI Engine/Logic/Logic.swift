@@ -11,7 +11,7 @@ class Logic: Resource {
     
     // Variables and Flags are shared across all Logic
     static var variables: [UInt8] = Array.init(repeating: 0, count: 255)
-    static var flags: [UInt8] = Array.init(repeating: 0, count: 255)
+    static var flags: [Bool] = Array.init(repeating: false, count: 255)
     
     static func setNewRoomGameState(roomNumber: UInt8) {
         variables[1] = variables[0]
@@ -21,8 +21,8 @@ class Logic: Resource {
         variables[9] = 0
         // variables[16] = ?
         variables[2] = 0
-        flags[2] = 0
-        flags[5] = 1
+        flags[2] = false
+        flags[5] = true
     }
     
     
@@ -78,7 +78,7 @@ class Logic: Resource {
         }
     }
     
-    func executeLogic(_ drawGraphics: (Int, Int, Int, Int) -> Void) {
+    func executeLogic(_ drawGraphics: (Int, Int, Int, Int, Bool) -> Void) {
         print("Execute Logic for Room: \(id)")
         
         for command in commands {

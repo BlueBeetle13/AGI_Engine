@@ -20,11 +20,11 @@ extension Logic {
                 var byte = try Utils.getNextByte(at: &logicPosition, from: logicData)
                 
                 // Control Code - this should always be an 'If' (0xFF)
-                if let ifCommand = Logic.controlCommands[byte]?.copy(), ifCommand.name == "if" {
+                if let ifCommand = Logic.controlCommands[byte]?.copy(), ifCommand.name == CommandName.control_if {
                     
                     // Keep reading in the conditions until we find the closing 'If'
                     byte = try Utils.getNextByte(at: &logicPosition, from: logicData)
-                    while byte != ifCommand.id {
+                    while Logic.controlCommands[byte]?.name != CommandName.control_if {
                         
                         if let controlCommand = Logic.controlCommands[byte]?.copy() {
                             ifCommand.conditions.append(controlCommand)

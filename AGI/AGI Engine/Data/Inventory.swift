@@ -7,23 +7,23 @@
 
 import Foundation
 
-struct Object {
+struct InventoryItem {
     let offset: UInt16
     let location: UInt8
     var name: String
 }
 
 /// An Object consists of an initial room number and a name. Used for inventory items
-class Objects {
+class Inventory {
     
     static let locationInitiallyCarried: UInt8 = 0xFF
     
-    static func fetchObjects(from path: String) -> [Object] {
+    static func fetchInventoryItems(from path: String) -> [InventoryItem] {
         
         var dataPosition = 0
         var isEncrypted = true
         
-        var objects: [Object] = []
+        var items: [InventoryItem] = []
         
         if let data = NSData(contentsOfFile: path) {
             Utils.debug("Objects: \(path) Total Size: \(data.length)")
@@ -63,32 +63,32 @@ class Objects {
                     // Offset must be divible by 3 (DOS) or 4 (Amiga) to indicate padding
                     let padding = (itemNamesOffset % 3 == 0) ? 3 : 4
                     
-                    let numObjects = itemNamesOffset / padding
+                    let numItems = itemNamesOffset / padding
                     
-                    Utils.debug("Total Objects: \(numObjects), Offset: \(itemNamesOffset), Encrypted: \(isEncrypted), Padding: \(padding)")
+                    Utils.debug("Total Objects: \(numItems), Offset: \(itemNamesOffset), Encrypted: \(isEncrypted), Padding: \(padding)")
                     
                     // Get the object offsets and starting room numbers
-                    for objectNum in 0 ..< numObjects {
+                    for itemNum in 0 ..< numItems {
                         
                         // Move to the expected position and read the offset
-                        dataPosition = (objectNum + 1) * padding
+                        dataPosition = (itemNum + 1) * padding
                         if dataPosition + padding < data.length {
                             let offset = try decryptNextWord() + UInt16(padding)
                             let location = try decryptNextByte()
                             
-                            let object = Object(offset: offset,
-                                                location: location,
-                                                name: "")
+                            let item = InventoryItem(offset: offset,
+                                                     location: location,
+                                                     name: "")
                             
-                            objects.append(object)
+                            items.append(item)
                         }
                     }
                     
                     // Get the object names
                     dataPosition = itemNamesOffset
-                    for pos in 1 ..< objects.count {
+                    for pos in 1 ..< items.count {
                         
-                        dataPosition = Int(objects[pos].offset)
+                        dataPosition = Int(items[pos].offset)
                         
                         var byte = try decryptNextByte()
                         
@@ -98,9 +98,9 @@ class Objects {
                             byte = try decryptNextByte()
                         }
                         
-                        objects[pos].name = name
+                        items[pos].name = name
                         
-                        Utils.debug("\(dataPosition): \(objects[pos])")
+                        Utils.debug("\(dataPosition): \(items[pos])")
                     }
                 } catch {
                     Utils.debug("Objects: EndOfData")
@@ -108,6 +108,6 @@ class Objects {
             }
         }
         
-        return objects
+        return items
     }
 }

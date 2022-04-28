@@ -11,10 +11,10 @@ import Foundation
 extension Logic {
     
     static let controlCommands: [UInt8: ControlCommand] = [
-        0xFF: ControlCommand(id: 0xFF, name: "if", numberOfArguments: 0),
-        0xFE: ControlCommand(id: 0xFE, name: "else", numberOfArguments: 0),
-        0xFD: ControlCommand(id: 0xFD, name: "not", numberOfArguments: 0),
-        0xFC: ControlCommand(id: 0xFC, name: "or", numberOfArguments: 0)
+        0xFF: ControlCommand(name: CommandName.control_if, numberOfArguments: 0),
+        0xFE: ControlCommand(name: CommandName.control_else, numberOfArguments: 0),
+        0xFD: ControlCommand(name: CommandName.control_not, numberOfArguments: 0),
+        0xFC: ControlCommand(name: CommandName.control_or, numberOfArguments: 0)
     ]
     
     class ControlCommand: Command {
@@ -25,31 +25,34 @@ extension Logic {
         var conditionsFailedSubCommands = [Command]()
         
         override func copy() -> ControlCommand {
-            return ControlCommand(id: id, name: name, numberOfArguments: numberOfArguments)
+            return ControlCommand(name: name, numberOfArguments: numberOfArguments)
         }
         
-        override func execute(_ drawGraphics: (Int, Int, Int, Int) -> Void) {
+        override func execute(_ drawGraphics: (Int, Int, Int, Int, Bool) -> Void) {
             
-            // Special case 1 command
-            if conditions.count == 1 {
-                
-                print("Execute: \(name) (\(conditions[0].debugPrint(""))) {")
-                
-                if let conditionCommand = conditions[0] as? ConditionCommand {
+            // if
+            if name == CommandName.control_if {
+                // Special case 1 command
+                if conditions.count == 1 {
                     
-                    conditionCommand.evaluate() ?
-                        conditionsPassedSubCommands.forEach { $0.execute(drawGraphics) } :
-                        conditionsFailedSubCommands.forEach { $0.execute(drawGraphics) }
+                    print("Execute: \(name) (\(conditions[0].debugPrint(""))) {")
                     
-                    print ("}")
+                    if let conditionCommand = conditions[0] as? ConditionCommand {
+                        
+                        conditionCommand.evaluate() ?
+                            conditionsPassedSubCommands.forEach { $0.execute(drawGraphics) } :
+                            conditionsFailedSubCommands.forEach { $0.execute(drawGraphics) }
+                        
+                        print ("}")
+                    }
                 }
-            }
-            
-            else {
-                /*for condition in conditions {
-                    
-                    print(condition.debugPrint("Condition: "))
-                }*/
+                
+                else {
+                    /*for condition in conditions {
+                     
+                     print(condition.debugPrint("Condition: "))
+                     }*/
+                }
             }
         }
         

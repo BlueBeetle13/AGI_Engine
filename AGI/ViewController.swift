@@ -30,12 +30,15 @@ extension NSImage {
     }
 }
 
-class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate {
+class ViewController: NSViewController,
+                      NSTableViewDataSource,
+                      NSTableViewDelegate {
     
     @IBOutlet weak var screenView: NSImageView!
     @IBOutlet weak var priorityView: NSImageView!
     @IBOutlet weak var picturesTableView: NSTableView!
     @IBOutlet weak var viewsTableView: NSTableView!
+    @IBOutlet weak var logicTableView: NSTableView!
     @IBOutlet weak var doubleResolutionButton: NSButton!
     
     // Rendering
@@ -44,6 +47,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
     let gameData = GameData()
     var pictures: [Picture] = []
     var views: [View] = []
+    var logic: [Logic] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,6 +57,9 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
         
         viewsTableView.dataSource = self
         viewsTableView.delegate = self
+        
+        logicTableView.dataSource = self
+        logicTableView.delegate = self
     }
     
     @IBAction func onLoadButtonPressed(_ sender: Any) {
@@ -70,18 +77,22 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                 print("Folder: \(path)")
                 
                 gameData.loadGameData(from: path,
-                                      loadFinished: { pictures, views in
+                                      loadFinished: { pictures, views, logic in
                                         self.pictures = Array(pictures.values).sorted(by: { $0.id < $1.id })
                                         self.views = Array(views.values).sorted(by: { $0.id < $1.id })
+                                        self.logic = Array(logic.values).sorted(by: { $0.id < $1.id })
                                         
                                         DispatchQueue.main.async {
                                             self.picturesTableView.reloadData()
                                             self.picturesTableView.scrollRowToVisible(0)
-                                            self.picturesTableView.selectRowIndexes(.init(integer: 0),
-                                                                                    byExtendingSelection: false)
+                                            //self.picturesTableView.selectRowIndexes(.init(integer: 0),
+                                            //                                        byExtendingSelection: false)
                                             
                                             self.viewsTableView.reloadData()
                                             self.viewsTableView.scrollRowToVisible(0)
+                                            
+                                            self.logicTableView.reloadData()
+                                            self.logicTableView.scrollRowToVisible(0)
                                         }
                                       },
                                       redraw: {
@@ -123,6 +134,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
         }
     }
     
+    // MARK: - TableView
     func numberOfRows(in tableView: NSTableView) -> Int {
         
         // Pictures
@@ -131,7 +143,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
         }
         
         // Views
-        else {
+        else if tableView == viewsTableView {
             
             var numRows = 0
             for view in views {
@@ -142,6 +154,11 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                 }
             }
             return numRows
+        }
+        
+        // Logic
+        else {
+            return logic.count
         }
     }
     
@@ -174,6 +191,12 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
             }
         }
         
+        if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "logicCellId"),
+                                     owner: nil) as? NSTableCellView {
+            cell.textField?.stringValue = "\(logic[row].id)"
+            return cell
+        }
+        
         return nil
     }
     
@@ -184,8 +207,9 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
             renderStartTime = Date().timeIntervalSince1970
             
             // Pictures
-            if tableView == picturesTableView {
-                print("Selected: \(pictures[picturesTableView.selectedRow].id)")
+            if tableView == picturesTableView, (0 ..< pictures.count).contains(picturesTableView.selectedRow) {
+                
+                print("Picture Selected: \(pictures[picturesTableView.selectedRow].id)")
                 gameData.drawPicture(id: pictures[picturesTableView.selectedRow].id)
                 
                 // Deselect View
@@ -193,10 +217,11 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
             }
             
             // Views
-            else if viewsTableView.selectedRow >= 0 {
+            else if tableView == viewsTableView {
+                
                 if let viewInfo = viewsTableView.view(atColumn: 0,
                                                       row: viewsTableView.selectedRow,
-                                                      makeIfNecessary: false) as? NSTableCellView {
+                                                      makeIfNecessary: true) as? NSTableCellView {
                     
                     // Extract the view info
                     var viewId = 0
@@ -208,10 +233,21 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                         loopNum = (itemsArray[1].split(separator: ":").last as NSString?)?.integerValue ?? 0
                         cellNum = (itemsArray[2].split(separator: ":").last as NSString?)?.integerValue ?? 0
                         
-                        print("Selected: \(viewId), \(loopNum), \(cellNum)")
+                        print("View Selected: \(viewId), \(loopNum), \(cellNum)")
                         gameData.drawView(viewId, loopNum, cellNum)
                     }
                 }
+            }
+            
+            // Logic
+            else if tableView == logicTableView, (0 ..< logic.count).contains(logicTableView.selectedRow) {
+                
+                print("Logic Selected: \(logic[logicTableView.selectedRow].id)")
+                gameData.playRoom(roomNumber: UInt8(logic[logicTableView.selectedRow].id))
+                
+                // Deselect Picture, View
+                self.picturesTableView.deselectAll(nil)
+                self.viewsTableView.deselectAll(nil)
             }
         }
     }
