@@ -48,7 +48,7 @@ class ViewController: NSViewController,
     var pictures: [Picture] = []
     var views: [View] = []
     var logic: [Logic] = []
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -124,6 +124,11 @@ class ViewController: NSViewController,
             }
         }
     }
+    
+    @IBAction func onLogicStepButtonPressed(_ sender: Any) {
+        gameData.stepLogic()
+    }
+    
     @IBAction func onDoubleResolutionChecked(_ sender: Any) {
         if doubleResolutionButton.state == .on {
             screenView.imageScaling = .scaleProportionallyUpOrDown
@@ -234,7 +239,11 @@ class ViewController: NSViewController,
                         cellNum = (itemsArray[2].split(separator: ":").last as NSString?)?.integerValue ?? 0
                         
                         print("View Selected: \(viewId), \(loopNum), \(cellNum)")
-                        gameData.drawView(viewId, loopNum, cellNum)
+                        let object = ScreenObject()
+                        object.viewId = viewId
+                        object.currentLoopNum = loopNum
+                        object.currentCellNum = cellNum
+                        gameData.drawScreenObject(object)
                     }
                 }
             }

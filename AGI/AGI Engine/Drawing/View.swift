@@ -149,10 +149,10 @@ class View: Resource {
         
         Utils.debug("Draw View: \(id), \(loopNum), \(cellNum)")
         
-        var pixelPosX = posX
-        var pixelPosY = posY
-        
         let cell = loops[loopNum].cells[cellNum]
+        
+        var pixelPosX = posX
+        var pixelPosY = posY - Int(cell.height) // We draw from the bottom left as the origin
         
         let transparentColor = Int(cell.transparencyAndMirror & 0x0F)
         
@@ -177,7 +177,7 @@ class View: Resource {
                 }
             }
             
-            pixelPosX = 0
+            pixelPosX = posX
             pixelPosY += 1
         }
     }

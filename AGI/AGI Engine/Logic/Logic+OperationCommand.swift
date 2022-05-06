@@ -202,14 +202,18 @@ extension Logic {
             return OperationCommand(name: name, numberOfArguments: numberOfArguments)
         }
         
-        override func execute(_ drawGraphics: (Int, Int, Int, Int, Bool) -> Void) {
+        override func process(_ drawGraphics: (Int?, ScreenObject?, Bool) -> Void) -> ProcessingChoice {
             
             var supportedOperation = true
             
             switch name {
             
+            case CommandName.operation_return:
+                print(debugPrint(""))
+                return .stopProcessing
+            
             case CommandName.operation_increment:
-                guard data.count == 1, (0 ... 255).contains(data[0]) else { break }
+                guard dataIsValid(bytes: 1) else { break }
                 
                 let variableNum = Int(data[0])
                 var value = Logic.variables[variableNum]
@@ -220,7 +224,7 @@ extension Logic {
                 }
                 
             case CommandName.operation_decrement:
-                guard data.count == 1, (0 ... 255).contains(data[0]) else { break }
+                guard dataIsValid(bytes: 1) else { break }
                 
                 let variableNum = Int(data[0])
                 var value = Logic.variables[variableNum]
@@ -231,51 +235,51 @@ extension Logic {
                 }
             
             case CommandName.operation_assign:
-                guard data.count == 2, (0 ... 255).contains(data[0]), (0 ... 255).contains(data[1]) else { break }
+                guard dataIsValid(bytes: 2) else { break }
                 
                 let variableNum = Int(data[0])
                 let value = data[1]
                 Logic.variables[variableNum] = value
                 
             case CommandName.operation_assign_v:
-                guard data.count == 2, (0 ... 255).contains(data[0]), (0 ... 255).contains(data[1]) else { break }
+                guard dataIsValid(bytes: 2) else { break }
                 
                 let variableNum = Int(data[0])
                 let valueNum = Int(data[1])
                 Logic.variables[variableNum] = Logic.variables[valueNum]
                 
             case CommandName.operation_set:
-                guard data.count == 1, (0 ... 255).contains(data[0]) else { break }
+                guard dataIsValid(bytes: 1) else { break }
                 
                 let flagNum = Int(data[0])
                 Logic.flags[flagNum] = true
                 
             case CommandName.operation_reset:
-                guard data.count == 1, (0 ... 255).contains(data[0]) else { break }
+                guard dataIsValid(bytes: 1) else { break }
                 
                 let flagNum = Int(data[0])
                 Logic.flags[flagNum] = false
                 
             case CommandName.operation_toggle:
-                guard data.count == 1, (0 ... 255).contains(data[0]) else { break }
+                guard dataIsValid(bytes: 1) else { break }
                 
                 let flagNum = Int(data[0])
                 Logic.flags[flagNum] = !Logic.flags[flagNum]
                 
             case CommandName.operation_set_v:
-                guard data.count == 1, (0 ... 255).contains(data[0]) else { break }
+                guard dataIsValid(bytes: 1) else { break }
                 
                 let variableNum = Int(data[0])
                 Logic.variables[variableNum] = 1
                 
             case CommandName.operation_reset_v:
-                guard data.count == 1, (0 ... 255).contains(data[0]) else { break }
+                guard dataIsValid(bytes: 1) else { break }
                 
                 let variableNum = Int(data[0])
                 Logic.variables[variableNum] = 0
                 
             case CommandName.operation_toggle_v:
-                guard data.count == 1, (0 ... 255).contains(data[0]) else { break }
+                guard dataIsValid(bytes: 1) else { break }
                 
                 let variableNum = Int(data[0])
                 
@@ -285,25 +289,76 @@ extension Logic {
                     Logic.variables[variableNum] = 0
                 }
                 
+            // MARK: Picture
             case CommandName.operation_draw_pic:
-                guard data.count == 1, (0 ... 255).contains(data[0]) else { break }
+                guard dataIsValid(bytes: 1) else { break }
                 
                 let variableNum = Int(data[0])
                 let pictureId = Int(Logic.variables[variableNum])
-                drawGraphics(pictureId, -1, -1, -1, false)
-                
-            case CommandName.operation_load_pic, CommandName.operation_discard_pic:
-                // These operations are using to save memory / time but not needed on modern systems
-                break
+                drawGraphics(pictureId, nil, false)
                 
             case CommandName.operation_show_pic:
-                drawGraphics(-1, -1, -1, -1, true)
+                drawGraphics(nil, nil, true)
+                
+            // MARK: ScreenObject
+            case CommandName.operation_set_view:
+                guard dataIsValid(bytes: 2) else { break }
+                
+                let screenObjectNum = Int(data[0])
+                let viewId = data[1]
+                
+                let screenObject = Logic.screenObjects[screenObjectNum]
+                screenObject.setView(viewId: Int(viewId))
+                
+            case CommandName.operation_position:
+                guard dataIsValid(bytes: 3) else { break }
+                
+                let screenObjectNum = Int(data[0])
+                let posX = Int(data[1])
+                let posY = Int(data[2])
+                
+                let screenObject = Logic.screenObjects[screenObjectNum]
+                screenObject.posX = posX
+                screenObject.posY = posY
+                screenObject.prevPosX = posX
+                screenObject.prevPosY = posY
+                
+            case CommandName.operation_draw:
+                guard dataIsValid(bytes: 1) else { break }
+                
+                let screenObjectNum = Int(data[0])
+                let screenObject = Logic.screenObjects[screenObjectNum]
+                
+                drawGraphics(nil, screenObject, false)
+                
+            case CommandName.operation_move_obj:
+                guard dataIsValid(bytes: 5) else { break }
+                
+                let screenObjectNum = Int(data[0])
+                
+                let screenObject = Logic.screenObjects[screenObjectNum]
+                screenObject.moveX = Int(data[1])
+                screenObject.moveY = Int(data[2])
+                screenObject.moveStepSize = Int(data[3])
+                screenObject.moveFlags = Int(data[4])
+              
+            // MARK: Unused
+            // These operations are using to save memory / time but not needed on modern systems
+            case CommandName.operation_load_pic,
+                 CommandName.operation_discard_pic,
+                 CommandName.operation_load_view,
+                 CommandName.operation_discard_view,
+                 CommandName.operation_load_sound,
+                 CommandName.operation_discard_sound:
+                break
                 
             default:
                 supportedOperation = false
             }
             
-            print("Execute: \(supportedOperation ? "" : "Unsupported Operation") \(debugPrint(""))")
+            print("\(supportedOperation ? "Process: " : "Unsupported Operation") \(debugPrint(""))")
+            
+            return .continueProcessing
         }
         
         // Debug print

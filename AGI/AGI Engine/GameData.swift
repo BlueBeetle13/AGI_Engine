@@ -39,48 +39,71 @@ class GameData {
     var pictureBuffer: UnsafeMutablePointer<Pixel>
     var priorityBuffer: UnsafeMutablePointer<Pixel>
     
+    // Game Flow
+    var drawGraphics: (Int?, ScreenObject?, Bool) -> Void = { (_, _, _) in }
+    var currentRoomLogic: Logic? = nil
+    
     init() {
         
         // Rendering
         pictureBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity:GameData.width * GameData.height)
         priorityBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity: GameData.width * GameData.height)
-    }
-    
-    func playRoom(roomNumber: UInt8) {
         
-        guard let logic = logic[Int(roomNumber)] else {
-            Utils.debug("Missing Room info; \(roomNumber)")
-            return
-        }
-        
-        print("Play Room: \(roomNumber)")
-        
-        Logic.setNewRoomGameState(roomNumber: roomNumber)
-        
-        let drawGraphics = { [weak self] (pictureId: Int,
-                                          viewId: Int,
-                                          viewLoopNum: Int,
-                                          viewCellNum: Int,
-                                          redrawScreen: Bool) in
-            print("Draw: \(pictureId), \(viewId), \(redrawScreen)")
+        drawGraphics = { (pictureId: Int?,
+                          screenObject: ScreenObject?,
+                          redrawScreen: Bool) in
             
-            // Picure
-            if pictureId != -1 {
-                self?.drawPicture(id: pictureId)
+            // Picture
+            if let id = pictureId {
+                print("Draw Picure: \(id)")
+                self.drawPicture(id: id)
             }
             
-            // View
-            else if viewId != -1 {
-                self?.drawView(viewId, viewLoopNum, viewCellNum)
+            // Screen Object
+            if let object = screenObject {
+                print("Draw ScreenObject: \(object.viewId) - \(object.posX) - \(object.posY)")
+                self.drawScreenObject(object)
             }
             
             // Redraw
             if redrawScreen {
-                self?.redrawLambda?()
+                print("Draw Screen")
+                self.redrawLambda?()
             }
         }
+    }
+    
+    func playRoom(roomNumber: UInt8) {
         
-        logic.executeLogic(drawGraphics)
+        print("Play Room: \(roomNumber)")
+        
+        guard logic.keys.contains(Int(roomNumber)) else {
+            Utils.debug("Missing Room info; \(roomNumber)")
+            return
+        }
+        
+        Logic.setNewRoomGameState(roomNumber: roomNumber)
+        currentRoomLogic = logic[Int(roomNumber)]
+        currentRoomLogic?.processLogic(drawGraphics)
+    }
+    
+    func stepLogic() {
+        
+        if let logic = currentRoomLogic {
+            
+            // Show game state
+            print("Flags")
+            for (index, flag) in Logic.flags.enumerated() {
+                print("\(index)) \(flag)")
+            }
+            print("\nVariables")
+            for (index, variable) in Logic.variables.enumerated() {
+                print("\(index)) \(variable)")
+            }
+            
+            Logic.setLogicStepState()
+            logic.processLogic(drawGraphics)
+        }
     }
     
     func drawPicture(id: Int) {
@@ -94,9 +117,10 @@ class GameData {
         }
     }
     
-    func drawView(_ viewId: Int, _ loopNum: Int, _ cellNum: Int) {
+    func drawScreenObject(_ screenObject: ScreenObject) {
         
-        if currentPictureNum != -1, let picture = pictures[currentPictureNum], let view = views[viewId] {
+        if currentPictureNum != -1, let picture = pictures[currentPictureNum],
+           let view = views[screenObject.viewId] {
             
             // Draw the picture
             picture.drawToBuffer(pictureBuffer, priorityBuffer)
@@ -104,10 +128,10 @@ class GameData {
             // Draw the view
             view.drawView(pictureBuffer: pictureBuffer,
                           priorityBuffer: priorityBuffer,
-                          posX: 0,
-                          posY: 0,
-                          loopNum: loopNum,
-                          cellNum: cellNum)
+                          posX: screenObject.posX,
+                          posY: screenObject.posY,
+                          loopNum: screenObject.currentLoopNum,
+                          cellNum: screenObject.currentCellNum)
             
             redrawLambda?()
         }
