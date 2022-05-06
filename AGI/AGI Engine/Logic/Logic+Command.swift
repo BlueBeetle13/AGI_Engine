@@ -7,8 +7,13 @@
 
 import Foundation
 
+enum ProcessingChoice {
+    case continueProcessing
+    case stopProcessing
+}
+
 protocol LogicPrintProtocol {
-    func execute(_ drawGraphics: (Int, Int, Int, Int, Bool) -> Void)
+    func process(_ drawGraphics: (Int?, ScreenObject?, Bool) -> Void) -> ProcessingChoice
     func debugPrint(_ prefix: String) -> String
 }
 
@@ -245,7 +250,20 @@ extension Logic {
             return Command(name: name, numberOfArguments: numberOfArguments)
         }
         
-        func execute(_ drawGraphics: (Int, Int, Int, Int, Bool) -> Void) {}
+        func dataIsValid(bytes: Int) -> Bool {
+            
+            for index in 0 ..< bytes {
+                if !(0 ... 255).contains(data[index]) {
+                    return false
+                }
+            }
+            
+            return true
+        }
+        
+        func process(_ drawGraphics: (Int?, ScreenObject?, Bool) -> Void) -> ProcessingChoice {
+            return .continueProcessing
+        }
         
         // Debug print
         func debugPrint(_ prefix: String) -> String {

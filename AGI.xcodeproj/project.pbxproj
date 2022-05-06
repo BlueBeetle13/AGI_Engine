@@ -31,8 +31,11 @@
 		4A69A10228125C7B0078B266 /* Logic+ControlCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A69A10128125C7B0078B266 /* Logic+ControlCommand.swift */; };
 		4A88746027DD889200B0F62F /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A88745F27DD889200B0F62F /* View.swift */; };
 		4A88746527DE8BB600B0F62F /* DataExtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A88746427DE8BB600B0F62F /* DataExtraction.swift */; };
+		4A8AB97428223487005C925C /* LogicControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8AB97328223487005C925C /* LogicControlTests.swift */; };
 		4AAC8B8C27E969C000D00FF4 /* Logic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAC8B8B27E969C000D00FF4 /* Logic.swift */; };
 		4AAC8B9127E96A1B00D00FF4 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAC8B9027E96A1B00D00FF4 /* Resource.swift */; };
+		4AD075FC28221C6A0051EB6C /* LogicConditionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD075FB28221C6A0051EB6C /* LogicConditionTests.swift */; };
+		4ADEFCF6281A3F6C00FE7B73 /* ScreenObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADEFCF5281A3F6C00FE7B73 /* ScreenObject.swift */; };
 		4AFBAA3227D5A88900193D77 /* Inventory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFBAA3127D5A88900193D77 /* Inventory.swift */; };
 /* End PBXBuildFile section */
 
@@ -85,8 +88,11 @@
 		4A69A10128125C7B0078B266 /* Logic+ControlCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logic+ControlCommand.swift"; sourceTree = "<group>"; };
 		4A88745F27DD889200B0F62F /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		4A88746427DE8BB600B0F62F /* DataExtraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtraction.swift; sourceTree = "<group>"; };
+		4A8AB97328223487005C925C /* LogicControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogicControlTests.swift; sourceTree = "<group>"; };
 		4AAC8B8B27E969C000D00FF4 /* Logic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logic.swift; sourceTree = "<group>"; };
 		4AAC8B9027E96A1B00D00FF4 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
+		4AD075FB28221C6A0051EB6C /* LogicConditionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogicConditionTests.swift; sourceTree = "<group>"; };
+		4ADEFCF5281A3F6C00FE7B73 /* ScreenObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenObject.swift; sourceTree = "<group>"; };
 		4AFBAA3127D5A88900193D77 /* Inventory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inventory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -171,6 +177,7 @@
 				4A69A10128125C7B0078B266 /* Logic+ControlCommand.swift */,
 				4A39A8EB27F544F300588EE9 /* Logic+ConditionCommand.swift */,
 				4A69A0F928125C340078B266 /* Logic+OperationCommand.swift */,
+				4ADEFCF5281A3F6C00FE7B73 /* ScreenObject.swift */,
 			);
 			path = Logic;
 			sourceTree = "<group>";
@@ -212,6 +219,8 @@
 		4A691AA727C72DD3001352E9 /* AGITests */ = {
 			isa = PBXGroup;
 			children = (
+				4A8AB97328223487005C925C /* LogicControlTests.swift */,
+				4AD075FB28221C6A0051EB6C /* LogicConditionTests.swift */,
 				4A691AA827C72DD3001352E9 /* AGITests.swift */,
 				4A691AAA27C72DD3001352E9 /* Info.plist */,
 			);
@@ -360,6 +369,7 @@
 				4AAC8B9127E96A1B00D00FF4 /* Resource.swift in Sources */,
 				4A00A3AE2803DDF30071C50F /* Room.swift in Sources */,
 				4AAC8B8C27E969C000D00FF4 /* Logic.swift in Sources */,
+				4ADEFCF6281A3F6C00FE7B73 /* ScreenObject.swift in Sources */,
 				4A00A3BD2803E65F0071C50F /* Logic+Data.swift in Sources */,
 				4A691ACA27C72EF4001352E9 /* Picture.swift in Sources */,
 				4A00A3B32803DE660071C50F /* GameData+Load.swift in Sources */,
@@ -386,6 +396,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A8AB97428223487005C925C /* LogicControlTests.swift in Sources */,
+				4AD075FC28221C6A0051EB6C /* LogicConditionTests.swift in Sources */,
 				4A691AA927C72DD3001352E9 /* AGITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

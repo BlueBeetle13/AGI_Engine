@@ -10,8 +10,25 @@ import Foundation
 class Logic: Resource {
     
     // Variables and Flags are shared across all Logic
-    static var variables: [UInt8] = Array.init(repeating: 0, count: 255)
-    static var flags: [Bool] = Array.init(repeating: false, count: 255)
+    static let numVariables = 255
+    static var variables: [UInt8] = Array.init(repeating: 0, count: numVariables)
+    
+    static let numFlags = 255
+    static var flags: [Bool] = Array.init(repeating: false, count: numFlags)
+    
+    static let numScreenObjects = 256
+    static var screenObjects: [ScreenObject] = Array.init(repeating: ScreenObject(), count: numScreenObjects)
+    
+    static let numStrings = 25
+    static var strings: [String] = Array.init(repeating: "", count: numStrings)
+    
+    static func setLogicStepState() {
+        variables[4] = 0
+        variables[5] = 0
+        flags[5] = false
+        flags[6] = false
+        flags[12] = false
+    }
     
     static func setNewRoomGameState(roomNumber: UInt8) {
         variables[1] = variables[0]
@@ -24,7 +41,6 @@ class Logic: Resource {
         flags[2] = false
         flags[5] = true
     }
-    
     
     struct LogicCode {
         let name: String
@@ -61,7 +77,7 @@ class Logic: Resource {
             
             commands = getSubCommandsFromData(prefix: "", logicData: logicData)
             
-            if id == 140 {
+            if id == 0 {
                 for command in commands { print("\(command.debugPrint(""))") }
             }
         } catch {
@@ -78,11 +94,14 @@ class Logic: Resource {
         }
     }
     
-    func executeLogic(_ drawGraphics: (Int, Int, Int, Int, Bool) -> Void) {
+    func processLogic(_ drawGraphics: (Int?, ScreenObject?, Bool) -> Void) {
         print("Execute Logic for Room: \(id)")
         
         for command in commands {
-            command.execute(drawGraphics)
+            
+            if command.process(drawGraphics) == .stopProcessing {
+                break
+            }
         }
     }
 }

@@ -28,32 +28,131 @@ extension Logic {
             return ControlCommand(name: name, numberOfArguments: numberOfArguments)
         }
         
-        override func execute(_ drawGraphics: (Int, Int, Int, Int, Bool) -> Void) {
+        override func process(_ drawGraphics: (Int?, ScreenObject?, Bool) -> Void) -> ProcessingChoice {
+            
+            func processSubCommands(evaluatesTrue: Bool) -> ProcessingChoice {
+                
+                if evaluatesTrue, !conditionsPassedSubCommands.isEmpty {
+                    print("Process: \(name) (\(conditions[0].debugPrint(""))) {")
+                    
+                    for command in conditionsPassedSubCommands {
+                        if command.process(drawGraphics) == .stopProcessing {
+                            return .stopProcessing
+                        }
+                    }
+                    
+                    print ("}")
+                }
+                
+                // conditionsFailedSubCommands
+                else if !conditionsFailedSubCommands.isEmpty {
+                    print("Process: else (\(conditions[0].debugPrint(""))) {")
+                    
+                    for command in conditionsFailedSubCommands {
+                        if command.process(drawGraphics) == .stopProcessing {
+                            return .stopProcessing
+                        }
+                    }
+                    
+                    print ("}")
+                }
+                
+                return .continueProcessing
+            }
+            
+            
+            return processSubCommands(evaluatesTrue: processLogic())
+        }
+        
+        func processLogic() -> Bool {
             
             // if
             if name == CommandName.control_if {
-                // Special case 1 command
-                if conditions.count == 1 {
+                
+                var orMode = false
+                var orModeEvaluatesTrue = false
+                var notMode = false
+                
+                for condition in conditions {
                     
-                    print("Execute: \(name) (\(conditions[0].debugPrint(""))) {")
-                    
-                    if let conditionCommand = conditions[0] as? ConditionCommand {
+                    // A Control code
+                    if let controlCommand = condition as? ControlCommand {
                         
-                        conditionCommand.evaluate() ?
-                            conditionsPassedSubCommands.forEach { $0.execute(drawGraphics) } :
-                            conditionsFailedSubCommands.forEach { $0.execute(drawGraphics) }
+                        // Enable 'Not' mode - always followed by the only condition it effects
+                        if controlCommand.name == CommandName.control_not {
+                            notMode = true
+                        }
                         
-                        print ("}")
+                        // 'Or' Mode
+                        if controlCommand.name == CommandName.control_or {
+                            
+                            // We are already in 'Or' mode and we get an 'Or' command.
+                            if orMode {
+                                
+                                // This evaluates false, since this is always &&'d with everything a false
+                                // will always mean the condition evaluates false
+                                if !orModeEvaluatesTrue {
+                                    return false
+                                }
+                                
+                                orMode = false
+                            }
+                            
+                            // Enable 'Or' mode
+                            else {
+                                orMode = true
+                                orModeEvaluatesTrue = false
+                            }
+                            
+                        }
                     }
+                    
+                    // A Condition Code
+                    else if let conditionCommand = condition as? ConditionCommand {
+                        
+                        // 'And' mode
+                        if !orMode, !notMode {
+                            
+                            // We evaluateFalse we know all the logc will fail
+                            if !conditionCommand.evaluate() {
+                                return false
+                            }
+                        }
+                        
+                        // 'Or' mode
+                        if orMode {
+                            
+                            // If we evaluateTrue, the 'Or' command will always pass from now on
+                            if conditionCommand.evaluate() {
+                                orModeEvaluatesTrue = true
+                            }
+                        }
+                        
+                        // 'Not' mode
+                        if notMode {
+                            
+                            // If we evaluateTrue, and we are Not'ing this, we are false, and fail
+                            if conditionCommand.evaluate() {
+                                return false
+                            }
+                            
+                            // We evaluatedFalse, which is Not'ed to true, so we pass and continue
+                            else {
+                                
+                                // Only stays set for 1 condition
+                                notMode = false
+                            }
+                        }
+                    }
+                    
+                    print(condition.debugPrint("Condition: "))
                 }
                 
-                else {
-                    /*for condition in conditions {
-                     
-                     print(condition.debugPrint("Condition: "))
-                     }*/
-                }
+                // We made it to the end, it must evaluateTrue
+                return true
             }
+            
+            return true
         }
         
         // Debug print
