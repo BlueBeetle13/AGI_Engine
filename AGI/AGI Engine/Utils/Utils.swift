@@ -7,12 +7,31 @@
 
 import Foundation
 
+enum DataReadError: Error {
+    case endOfData
+}
+
 class Utils {
     
     //static func debug(_ message: String) { print(message) }
     static func debug(_ message: String) { }
     
-    static func getNextByte(at dataPosition: inout Int, from data: NSData) -> UInt8 {
+    static func arrayPos(_ x: Int, _ y: Int) -> Int {
+        guard x < GameData.width && y < GameData.height && x >= 0 && y >= 0 else { return 0 }
+        
+        return (Int(y) * GameData.width) + Int(x)
+    }
+    
+    static func drawPixel(buffer: UnsafeMutablePointer<Pixel>, x: Int, y: Int, color: Pixel) {
+        buffer[arrayPos(x * 2, y)] = color
+        buffer[arrayPos((x * 2) + 1, y)] = color
+    }
+    
+    static func getPixel(buffer: UnsafeMutablePointer<Pixel>, x: Int, y: Int) -> Pixel {
+        buffer[arrayPos(x * 2, y)]
+    }
+    
+    static func getNextByte(at dataPosition: inout Int, from data: NSData) throws -> UInt8 {
         var byteBuffer: UInt8 = 0
         
         if dataPosition < data.length {
@@ -22,12 +41,12 @@ class Utils {
             return byteBuffer
         }
         
-        return 0
+        throw DataReadError.endOfData
     }
     
-    static func getNextWord(at dataPosition: inout Int, from data: NSData) -> Int {
-        let low = Int(getNextByte(at: &dataPosition, from: data))
-        let high = Int(getNextByte(at: &dataPosition, from: data))
+    static func getNextWord(at dataPosition: inout Int, from data: NSData) throws -> Int {
+        let low = try Int(getNextByte(at: &dataPosition, from: data))
+        let high = try Int(getNextByte(at: &dataPosition, from: data))
         return ((high << 8) + low)
     }
     
@@ -45,7 +64,7 @@ class Utils {
     
     static func peekNextWord(at dataPosition: Int, from data: NSData) -> Int {
         let low = Int(peekNextByte(at: dataPosition, from: data))
-        let high = Int(peekNextByte(at: dataPosition, from: data))
+        let high = Int(peekNextByte(at: dataPosition + 1, from: data))
         return ((high << 8) + low)
     }
 }

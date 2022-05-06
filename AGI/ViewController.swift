@@ -8,69 +8,58 @@
 import Cocoa
 import CoreGraphics
 
-public struct Pixel: Equatable {
-    var a,r,g,b: UInt8
-    
-    public static func == (lhs: Pixel, rhs: Pixel) -> Bool {
-        return lhs.a == rhs.a && lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b
-    }
-}
-
 extension NSImage {
-    convenience init?(pixels: [Pixel], width: Int, height: Int) {
-        guard width > 0 && height > 0, pixels.count == width * height else { return nil }
-        var data = pixels
-        guard let providerRef = CGDataProvider(data: Data(bytes: &data, count: data.count * MemoryLayout<Pixel>.size) as CFData)
-            else { return nil }
+    convenience init?(pixels: UnsafeRawPointer, width: Int, height: Int) {
+        let data = Data(bytes: pixels, count: width * height * MemoryLayout<Pixel>.size) as CFData
+        guard let providerRef = CGDataProvider(data: data)  else { return nil }
+
         guard let cgim = CGImage(
-            width: width,
-            height: height,
-            bitsPerComponent: 8,
-            bitsPerPixel: 32,
-            bytesPerRow: width * MemoryLayout<Pixel>.size,
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue),
-            provider: providerRef,
-            decode: nil,
-            shouldInterpolate: true,
-            intent: .defaultIntent)
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bitsPerPixel: 24,
+                bytesPerRow: width * MemoryLayout<Pixel>.size,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
+                provider: providerRef,
+                decode: nil,
+                shouldInterpolate: true,
+                intent: .defaultIntent)
         else { return nil }
         self.init(cgImage: cgim, size: NSSize(width: width, height: height))
     }
 }
 
-class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate {
+class ViewController: NSViewController,
+                      NSTableViewDataSource,
+                      NSTableViewDelegate {
     
     @IBOutlet weak var screenView: NSImageView!
+    @IBOutlet weak var priorityView: NSImageView!
     @IBOutlet weak var picturesTableView: NSTableView!
+    @IBOutlet weak var viewsTableView: NSTableView!
+    @IBOutlet weak var logicTableView: NSTableView!
+    @IBOutlet weak var doubleResolutionButton: NSButton!
     
     // Rendering
-    let width = 320
-    let height = 200
-    var buffer: [Pixel] = []
+    var renderStartTime: TimeInterval = 0
     
     let gameData = GameData()
     var pictures: [Picture] = []
-
+    var views: [View] = []
+    var logic: [Logic] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        buffer = Array.init(repeating: Pixel(a: 255, r: 255, g: 255, b: 255), count: width * height)
-        
-        if let image = NSImage.init(pixels: buffer, width: width, height: height)  {
-            screenView.image = image
-        }
-        
         picturesTableView.dataSource = self
         picturesTableView.delegate = self
-
-        //gameData.loadGameData(from: "/Users/typhoonsoftware/Downloads/spacequestiivohaulsrevenge1987/sq2/")
-    }
-
-    override var representedObject: Any? {
-        didSet {
-        // Update the view, if already loaded.
-        }
+        
+        viewsTableView.dataSource = self
+        viewsTableView.delegate = self
+        
+        logicTableView.dataSource = self
+        logicTableView.delegate = self
     }
     
     @IBAction func onLoadButtonPressed(_ sender: Any) {
@@ -88,39 +77,128 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                 print("Folder: \(path)")
                 
                 gameData.loadGameData(from: path,
-                                      with: &buffer,
-                                      loadFinished: { pictures in
+                                      loadFinished: { pictures, views, logic in
                                         self.pictures = Array(pictures.values).sorted(by: { $0.id < $1.id })
+                                        self.views = Array(views.values).sorted(by: { $0.id < $1.id })
+                                        self.logic = Array(logic.values).sorted(by: { $0.id < $1.id })
                                         
                                         DispatchQueue.main.async {
                                             self.picturesTableView.reloadData()
                                             self.picturesTableView.scrollRowToVisible(0)
-                                            self.picturesTableView.selectRowIndexes(.init(integer: 0),
-                                                                                    byExtendingSelection: false)
+                                            //self.picturesTableView.selectRowIndexes(.init(integer: 0),
+                                            //                                        byExtendingSelection: false)
+                                            
+                                            self.viewsTableView.reloadData()
+                                            self.viewsTableView.scrollRowToVisible(0)
+                                            
+                                            self.logicTableView.reloadData()
+                                            self.logicTableView.scrollRowToVisible(0)
                                         }
                                       },
                                       redraw: {
                                         
+                                        print("Time1: \(Date().timeIntervalSince1970 - self.renderStartTime)")
+                                        
                                         // Redraw image
                                         DispatchQueue.main.async {
-                                            if let image = NSImage.init(pixels: self.buffer, width: self.width, height: self.height)  {
+                                            
+                                            // Picture
+                                            if let image = NSImage.init(pixels: self.gameData.pictureBuffer,
+                                                                        width: GameData.width,
+                                                                        height: GameData.height)  {
+                                                
                                                 self.screenView.image = image
                                             }
+                                            
+                                            // Priority
+                                            if let image = NSImage.init(pixels: self.gameData.priorityBuffer,
+                                                                        width: GameData.width,
+                                                                        height: GameData.height)  {
+                                                
+                                                self.priorityView.image = image
+                                            }
+                                            
+                                            print("Time2: \(Date().timeIntervalSince1970 - self.renderStartTime)")
                                         }
                                       })
             }
         }
     }
     
+    @IBAction func onLogicStepButtonPressed(_ sender: Any) {
+        gameData.stepLogic()
+    }
+    
+    @IBAction func onDoubleResolutionChecked(_ sender: Any) {
+        if doubleResolutionButton.state == .on {
+            screenView.imageScaling = .scaleProportionallyUpOrDown
+            priorityView.imageScaling = .scaleProportionallyUpOrDown
+        } else {
+            screenView.imageScaling = .scaleNone
+            priorityView.imageScaling = .scaleNone
+        }
+    }
+    
+    // MARK: - TableView
     func numberOfRows(in tableView: NSTableView) -> Int {
-        return pictures.count
+        
+        // Pictures
+        if tableView == picturesTableView {
+            return pictures.count
+        }
+        
+        // Views
+        else if tableView == viewsTableView {
+            
+            var numRows = 0
+            for view in views {
+                for loop in view.loops {
+                    for _ in loop.cells {
+                        numRows += 1
+                    }
+                }
+            }
+            return numRows
+        }
+        
+        // Logic
+        else {
+            return logic.count
+        }
     }
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         
-        if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "pictureId"),
+        // Pictures
+        if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "pictureCellId"),
                                      owner: nil) as? NSTableCellView {
             cell.textField?.stringValue = "\(pictures[row].id)"
+            return cell
+        }
+        
+        // Views
+        if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "viewCellId"),
+                                     owner: nil) as? NSTableCellView {
+            
+            var numRows = 0
+            for view in views {
+                for (loopIndex, loop) in view.loops.enumerated() {
+                    for (cellIndex, _) in loop.cells.enumerated() {
+                        
+                        if numRows == row {
+                            cell.textField?.stringValue = "V:\(view.id) L:\(loopIndex) C:\(cellIndex)"
+                            return cell
+                        }
+                        
+                        numRows += 1
+                    }
+                }
+            }
+        }
+        
+        if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "logicCellId"),
+                                     owner: nil) as? NSTableCellView {
+            cell.textField?.stringValue = "\(logic[row].id)"
             return cell
         }
         
@@ -128,11 +206,59 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
     }
     
     func tableViewSelectionDidChange(_ notification: Notification) {
-        print("Selected: \(pictures[picturesTableView.selectedRow].id)")
         
-        buffer = Array(repeating: Pixel(a: 255, r: 255, g: 255, b: 255), count: width * height)
-        
-        gameData.loadPicture(id: pictures[picturesTableView.selectedRow].id, buffer: &buffer)
+        if let tableView = notification.object as? NSTableView {
+            
+            renderStartTime = Date().timeIntervalSince1970
+            
+            // Pictures
+            if tableView == picturesTableView, (0 ..< pictures.count).contains(picturesTableView.selectedRow) {
+                
+                print("Picture Selected: \(pictures[picturesTableView.selectedRow].id)")
+                gameData.drawPicture(id: pictures[picturesTableView.selectedRow].id)
+                
+                // Deselect View
+                self.viewsTableView.deselectAll(nil)
+            }
+            
+            // Views
+            else if tableView == viewsTableView {
+                
+                if let viewInfo = viewsTableView.view(atColumn: 0,
+                                                      row: viewsTableView.selectedRow,
+                                                      makeIfNecessary: true) as? NSTableCellView {
+                    
+                    // Extract the view info
+                    var viewId = 0
+                    var loopNum = 0
+                    var cellNum = 0
+                    if let itemsArray = viewInfo.textField?.stringValue.split(separator: " "), itemsArray.count == 3 {
+                        
+                        viewId = (itemsArray[0].split(separator: ":").last as NSString?)?.integerValue ?? 0
+                        loopNum = (itemsArray[1].split(separator: ":").last as NSString?)?.integerValue ?? 0
+                        cellNum = (itemsArray[2].split(separator: ":").last as NSString?)?.integerValue ?? 0
+                        
+                        print("View Selected: \(viewId), \(loopNum), \(cellNum)")
+                        let object = ScreenObject()
+                        object.viewId = viewId
+                        object.currentLoopNum = loopNum
+                        object.currentCellNum = cellNum
+                        gameData.drawScreenObject(object)
+                    }
+                }
+            }
+            
+            // Logic
+            else if tableView == logicTableView, (0 ..< logic.count).contains(logicTableView.selectedRow) {
+                
+                print("Logic Selected: \(logic[logicTableView.selectedRow].id)")
+                gameData.playRoom(roomNumber: UInt8(logic[logicTableView.selectedRow].id))
+                
+                // Deselect Picture, View
+                self.picturesTableView.deselectAll(nil)
+                self.viewsTableView.deselectAll(nil)
+            }
+        }
     }
 }
 

@@ -17,6 +17,7 @@ struct DirectoryItem {
     }
 }
 
+/// Directory is a dictionary of the item number pointing to the location of the data (volume file and position of the Volume object
 class Directory {
     
     var items: [Int: DirectoryItem] = [:]
@@ -42,7 +43,7 @@ class Directory {
         let bytes: [UInt8] = data.map { $0 }
         
         var index: Int = 0
-        for itemNum in 0..<(data.length / 3) {
+        for itemNum in 0 ..< (data.length / 3) {
             let byte1 = bytes[index]
             let byte2 = bytes[index + 1]
             let byte3 = bytes[index + 2]
@@ -51,7 +52,9 @@ class Directory {
                 items[itemNum] = DirectoryItem(byte1: byte1, byte2: byte2, byte3: byte3)
             }
             
-            Utils.debug("DirectoryItem: \(itemNum): \(items[itemNum])")
+            if let item = items[itemNum] {
+                Utils.debug("DirectoryItem: \(itemNum): \(item)")
+            }
             
             index += 3
         }

@@ -7,11 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A00A3A627FE83790071C50F /* Logic+Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A00A3A527FE83790071C50F /* Logic+Command.swift */; };
+		4A00A3AE2803DDF30071C50F /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A00A3AD2803DDF30071C50F /* Room.swift */; };
+		4A00A3B32803DE660071C50F /* GameData+Load.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A00A3B22803DE660071C50F /* GameData+Load.swift */; };
+		4A00A3BD2803E65F0071C50F /* Logic+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A00A3BC2803E65F0071C50F /* Logic+Data.swift */; };
 		4A13153E27D2BACF0098908E /* Picture+Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A13153D27D2BACF0098908E /* Picture+Line.swift */; };
 		4A13154327D2BC0C0098908E /* Picture+Fill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A13154227D2BC0C0098908E /* Picture+Fill.swift */; };
 		4A13154827D2BC440098908E /* Picture+Pen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A13154727D2BC430098908E /* Picture+Pen.swift */; };
 		4A28413027D409D600F61AD0 /* Words.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A28412F27D409D600F61AD0 /* Words.swift */; };
 		4A28413527D552CE00F61AD0 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A28413427D552CE00F61AD0 /* Utils.swift */; };
+		4A39A8EC27F544F300588EE9 /* Logic+ConditionCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A39A8EB27F544F300588EE9 /* Logic+ConditionCommand.swift */; };
 		4A691A9627C72DCA001352E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A691A9527C72DCA001352E9 /* AppDelegate.swift */; };
 		4A691A9827C72DCA001352E9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A691A9727C72DCA001352E9 /* ViewController.swift */; };
 		4A691A9A27C72DD3001352E9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A691A9927C72DD3001352E9 /* Assets.xcassets */; };
@@ -22,7 +27,16 @@
 		4A691ACA27C72EF4001352E9 /* Picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A691AC927C72EF4001352E9 /* Picture.swift */; };
 		4A691AD727C73849001352E9 /* Directory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A691AD627C73849001352E9 /* Directory.swift */; };
 		4A691ADF27C74F1C001352E9 /* Volume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A691ADE27C74F1C001352E9 /* Volume.swift */; };
-		4AFBAA3227D5A88900193D77 /* Objects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFBAA3127D5A88900193D77 /* Objects.swift */; };
+		4A69A0FA28125C340078B266 /* Logic+OperationCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A69A0F928125C340078B266 /* Logic+OperationCommand.swift */; };
+		4A69A10228125C7B0078B266 /* Logic+ControlCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A69A10128125C7B0078B266 /* Logic+ControlCommand.swift */; };
+		4A88746027DD889200B0F62F /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A88745F27DD889200B0F62F /* View.swift */; };
+		4A88746527DE8BB600B0F62F /* DataExtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A88746427DE8BB600B0F62F /* DataExtraction.swift */; };
+		4A8AB97428223487005C925C /* LogicControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8AB97328223487005C925C /* LogicControlTests.swift */; };
+		4AAC8B8C27E969C000D00FF4 /* Logic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAC8B8B27E969C000D00FF4 /* Logic.swift */; };
+		4AAC8B9127E96A1B00D00FF4 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAC8B9027E96A1B00D00FF4 /* Resource.swift */; };
+		4AD075FC28221C6A0051EB6C /* LogicConditionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD075FB28221C6A0051EB6C /* LogicConditionTests.swift */; };
+		4ADEFCF6281A3F6C00FE7B73 /* ScreenObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADEFCF5281A3F6C00FE7B73 /* ScreenObject.swift */; };
+		4AFBAA3227D5A88900193D77 /* Inventory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFBAA3127D5A88900193D77 /* Inventory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,11 +57,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4A00A3A527FE83790071C50F /* Logic+Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logic+Command.swift"; sourceTree = "<group>"; };
+		4A00A3AD2803DDF30071C50F /* Room.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room.swift; sourceTree = "<group>"; };
+		4A00A3B22803DE660071C50F /* GameData+Load.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameData+Load.swift"; sourceTree = "<group>"; };
+		4A00A3BC2803E65F0071C50F /* Logic+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logic+Data.swift"; sourceTree = "<group>"; };
 		4A13153D27D2BACF0098908E /* Picture+Line.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Picture+Line.swift"; sourceTree = "<group>"; };
 		4A13154227D2BC0C0098908E /* Picture+Fill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Picture+Fill.swift"; sourceTree = "<group>"; };
 		4A13154727D2BC430098908E /* Picture+Pen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Picture+Pen.swift"; sourceTree = "<group>"; };
 		4A28412F27D409D600F61AD0 /* Words.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Words.swift; sourceTree = "<group>"; };
 		4A28413427D552CE00F61AD0 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		4A39A8EB27F544F300588EE9 /* Logic+ConditionCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logic+ConditionCommand.swift"; sourceTree = "<group>"; };
 		4A691A9227C72DCA001352E9 /* AGI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AGI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A691A9527C72DCA001352E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A691A9727C72DCA001352E9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -65,7 +84,16 @@
 		4A691AC927C72EF4001352E9 /* Picture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Picture.swift; sourceTree = "<group>"; };
 		4A691AD627C73849001352E9 /* Directory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Directory.swift; sourceTree = "<group>"; };
 		4A691ADE27C74F1C001352E9 /* Volume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Volume.swift; sourceTree = "<group>"; };
-		4AFBAA3127D5A88900193D77 /* Objects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Objects.swift; sourceTree = "<group>"; };
+		4A69A0F928125C340078B266 /* Logic+OperationCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logic+OperationCommand.swift"; sourceTree = "<group>"; };
+		4A69A10128125C7B0078B266 /* Logic+ControlCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logic+ControlCommand.swift"; sourceTree = "<group>"; };
+		4A88745F27DD889200B0F62F /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
+		4A88746427DE8BB600B0F62F /* DataExtraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtraction.swift; sourceTree = "<group>"; };
+		4A8AB97328223487005C925C /* LogicControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogicControlTests.swift; sourceTree = "<group>"; };
+		4AAC8B8B27E969C000D00FF4 /* Logic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logic.swift; sourceTree = "<group>"; };
+		4AAC8B9027E96A1B00D00FF4 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
+		4AD075FB28221C6A0051EB6C /* LogicConditionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogicConditionTests.swift; sourceTree = "<group>"; };
+		4ADEFCF5281A3F6C00FE7B73 /* ScreenObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenObject.swift; sourceTree = "<group>"; };
+		4AFBAA3127D5A88900193D77 /* Inventory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inventory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +121,67 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4A11F8E727E54C8A008099C3 /* AGI Engine */ = {
+			isa = PBXGroup;
+			children = (
+				4A691AC427C72EE0001352E9 /* GameData.swift */,
+				4A00A3B22803DE660071C50F /* GameData+Load.swift */,
+				4A00A3AD2803DDF30071C50F /* Room.swift */,
+				4AAC8B9027E96A1B00D00FF4 /* Resource.swift */,
+				4A11F8EB27E54CF5008099C3 /* Logic */,
+				4A11F8E927E54CB4008099C3 /* Data */,
+				4A11F8E827E54C98008099C3 /* Drawing */,
+				4A11F8EA27E54CC6008099C3 /* Utils */,
+			);
+			path = "AGI Engine";
+			sourceTree = "<group>";
+		};
+		4A11F8E827E54C98008099C3 /* Drawing */ = {
+			isa = PBXGroup;
+			children = (
+				4A88745F27DD889200B0F62F /* View.swift */,
+				4A691AC927C72EF4001352E9 /* Picture.swift */,
+				4A13154727D2BC430098908E /* Picture+Pen.swift */,
+				4A13154227D2BC0C0098908E /* Picture+Fill.swift */,
+				4A13153D27D2BACF0098908E /* Picture+Line.swift */,
+			);
+			path = Drawing;
+			sourceTree = "<group>";
+		};
+		4A11F8E927E54CB4008099C3 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				4A691AD627C73849001352E9 /* Directory.swift */,
+				4A691ADE27C74F1C001352E9 /* Volume.swift */,
+				4AFBAA3127D5A88900193D77 /* Inventory.swift */,
+				4A28412F27D409D600F61AD0 /* Words.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		4A11F8EA27E54CC6008099C3 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				4A28413427D552CE00F61AD0 /* Utils.swift */,
+				4A88746427DE8BB600B0F62F /* DataExtraction.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		4A11F8EB27E54CF5008099C3 /* Logic */ = {
+			isa = PBXGroup;
+			children = (
+				4AAC8B8B27E969C000D00FF4 /* Logic.swift */,
+				4A00A3BC2803E65F0071C50F /* Logic+Data.swift */,
+				4A00A3A527FE83790071C50F /* Logic+Command.swift */,
+				4A69A10128125C7B0078B266 /* Logic+ControlCommand.swift */,
+				4A39A8EB27F544F300588EE9 /* Logic+ConditionCommand.swift */,
+				4A69A0F928125C340078B266 /* Logic+OperationCommand.swift */,
+				4ADEFCF5281A3F6C00FE7B73 /* ScreenObject.swift */,
+			);
+			path = Logic;
+			sourceTree = "<group>";
+		};
 		4A691A8927C72DC9001352E9 = {
 			isa = PBXGroup;
 			children = (
@@ -122,16 +211,7 @@
 				4A691A9B27C72DD3001352E9 /* Main.storyboard */,
 				4A691A9E27C72DD3001352E9 /* Info.plist */,
 				4A691A9F27C72DD3001352E9 /* AGI.entitlements */,
-				4A691AC427C72EE0001352E9 /* GameData.swift */,
-				4A691AD627C73849001352E9 /* Directory.swift */,
-				4A691ADE27C74F1C001352E9 /* Volume.swift */,
-				4A691AC927C72EF4001352E9 /* Picture.swift */,
-				4A13154727D2BC430098908E /* Picture+Pen.swift */,
-				4A13154227D2BC0C0098908E /* Picture+Fill.swift */,
-				4A13153D27D2BACF0098908E /* Picture+Line.swift */,
-				4A28412F27D409D600F61AD0 /* Words.swift */,
-				4AFBAA3127D5A88900193D77 /* Objects.swift */,
-				4A28413427D552CE00F61AD0 /* Utils.swift */,
+				4A11F8E727E54C8A008099C3 /* AGI Engine */,
 			);
 			path = AGI;
 			sourceTree = "<group>";
@@ -139,6 +219,8 @@
 		4A691AA727C72DD3001352E9 /* AGITests */ = {
 			isa = PBXGroup;
 			children = (
+				4A8AB97328223487005C925C /* LogicControlTests.swift */,
+				4AD075FB28221C6A0051EB6C /* LogicConditionTests.swift */,
 				4A691AA827C72DD3001352E9 /* AGITests.swift */,
 				4A691AAA27C72DD3001352E9 /* Info.plist */,
 			);
@@ -283,17 +365,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A88746027DD889200B0F62F /* View.swift in Sources */,
+				4AAC8B9127E96A1B00D00FF4 /* Resource.swift in Sources */,
+				4A00A3AE2803DDF30071C50F /* Room.swift in Sources */,
+				4AAC8B8C27E969C000D00FF4 /* Logic.swift in Sources */,
+				4ADEFCF6281A3F6C00FE7B73 /* ScreenObject.swift in Sources */,
+				4A00A3BD2803E65F0071C50F /* Logic+Data.swift in Sources */,
 				4A691ACA27C72EF4001352E9 /* Picture.swift in Sources */,
+				4A00A3B32803DE660071C50F /* GameData+Load.swift in Sources */,
 				4A691A9827C72DCA001352E9 /* ViewController.swift in Sources */,
 				4A691AC527C72EE0001352E9 /* GameData.swift in Sources */,
 				4A13154327D2BC0C0098908E /* Picture+Fill.swift in Sources */,
+				4A88746527DE8BB600B0F62F /* DataExtraction.swift in Sources */,
+				4A69A10228125C7B0078B266 /* Logic+ControlCommand.swift in Sources */,
 				4A691ADF27C74F1C001352E9 /* Volume.swift in Sources */,
+				4A69A0FA28125C340078B266 /* Logic+OperationCommand.swift in Sources */,
+				4A39A8EC27F544F300588EE9 /* Logic+ConditionCommand.swift in Sources */,
+				4A00A3A627FE83790071C50F /* Logic+Command.swift in Sources */,
 				4A13153E27D2BACF0098908E /* Picture+Line.swift in Sources */,
 				4A691A9627C72DCA001352E9 /* AppDelegate.swift in Sources */,
 				4A28413527D552CE00F61AD0 /* Utils.swift in Sources */,
 				4A13154827D2BC440098908E /* Picture+Pen.swift in Sources */,
 				4A691AD727C73849001352E9 /* Directory.swift in Sources */,
-				4AFBAA3227D5A88900193D77 /* Objects.swift in Sources */,
+				4AFBAA3227D5A88900193D77 /* Inventory.swift in Sources */,
 				4A28413027D409D600F61AD0 /* Words.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -302,6 +396,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A8AB97428223487005C925C /* LogicControlTests.swift in Sources */,
+				4AD075FC28221C6A0051EB6C /* LogicConditionTests.swift in Sources */,
 				4A691AA927C72DD3001352E9 /* AGITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
