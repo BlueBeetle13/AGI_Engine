@@ -125,8 +125,8 @@ extension Logic {
                 let testMaxX = data[3]
                 let testMaxY = data[4]
                 
-                let objectInX = (testMinX ..< testMaxX).contains(UInt8(object.posX))
-                let objectInY = (testMinY ..< testMaxY).contains(UInt8(object.posY))
+                let objectInX = (testMinX ... testMaxX).contains(UInt8(object.posX))
+                let objectInY = (testMinY ... testMaxY).contains(UInt8(object.posY))
                 
                 return objectInX && objectInY
             }

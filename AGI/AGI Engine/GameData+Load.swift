@@ -18,7 +18,7 @@ extension GameData {
             viewsDirectory = nil
             volumes.clear()
             pictures.removeAll()
-            views.removeAll()
+            Logic.views.removeAll()
             inventoryItems.removeAll()
             words.removeAll()
             redrawLambda = redraw
@@ -80,7 +80,7 @@ extension GameData {
         loadViewData()
         
         // Tell UI load is finished
-        loadFinished(pictures, views, logic)
+        loadFinished(pictures, Logic.views, logic)
     }
     
     func loadAllFilesDirectoryData(_ path: String) {
@@ -181,7 +181,7 @@ extension GameData {
                                                       position: directoryItem.position,
                                                       type: VolumeType.view) {
                         
-                        views[key] = View(volumeInfo: viewInfo, id: key, version: agiVersion)
+                        Logic.views[key] = View(volumeInfo: viewInfo, id: key, version: agiVersion)
                     }
                 }
             }

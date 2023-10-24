@@ -32,8 +32,12 @@ extension Logic {
             
             func processSubCommands(evaluatesTrue: Bool) -> ProcessingChoice {
                 
+                let conditionsStr = conditions.map({ condition in
+                    return "\(condition.name) -> \(condition.data) "
+                }).joined().trimmingCharacters(in: .whitespaces)
+                
                 if evaluatesTrue, !conditionsPassedSubCommands.isEmpty {
-                    print("Process: \(name) (\(conditions[0].debugPrint(""))) {")
+                    print("Process: \(name) (\(conditionsStr)) {")
                     
                     for command in conditionsPassedSubCommands {
                         if command.process(drawGraphics) == .stopProcessing {
@@ -46,7 +50,7 @@ extension Logic {
                 
                 // conditionsFailedSubCommands
                 else if !conditionsFailedSubCommands.isEmpty {
-                    print("Process: else (\(conditions[0].debugPrint(""))) {")
+                    print("Process: else (\(conditionsStr)) {")
                     
                     for command in conditionsFailedSubCommands {
                         if command.process(drawGraphics) == .stopProcessing {
@@ -144,8 +148,6 @@ extension Logic {
                             }
                         }
                     }
-                    
-                    print(condition.debugPrint("Condition: "))
                 }
                 
                 // We made it to the end, it must evaluateTrue

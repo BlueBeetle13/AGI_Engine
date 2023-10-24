@@ -22,6 +22,8 @@ class View: Resource {
         let cells: [Cell]
     }
     
+    var stepSize: UInt8 = 0
+    var cycleTime: UInt8 = 0 
     var loops: [Loop]
     
     private let maxCells = 255
@@ -45,9 +47,8 @@ class View: Resource {
             
         // Unused
         do {
-            _ = try Utils.getNextByte(at: &dataPosition, from: data)
-            _ = try Utils.getNextByte(at: &dataPosition, from: data)
-            
+            stepSize = try Utils.getNextByte(at: &dataPosition, from: data)
+            cycleTime = try Utils.getNextByte(at: &dataPosition, from: data)
             numberOfLoops = try Utils.getNextByte(at: &dataPosition, from: data)
             descriptionOffset = UInt16(try Utils.getNextWord(at: &dataPosition, from: data))
             

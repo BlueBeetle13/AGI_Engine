@@ -308,7 +308,18 @@ extension Logic {
                 let viewId = data[1]
                 
                 let screenObject = Logic.screenObjects[screenObjectNum]
-                screenObject.setView(viewId: Int(viewId))
+                if let view = Logic.views[Int(viewId)] {
+                    screenObject.setView(view)
+                }
+                
+            case CommandName.operation_set_loop:
+                guard dataIsValid(bytes: 2) else { break }
+                
+                let screenObjectNum = Int(data[0])
+                let loopNum = data[1]
+                
+                let screenObject = Logic.screenObjects[screenObjectNum]
+                screenObject.currentLoopNum = Int(loopNum)
                 
             case CommandName.operation_position:
                 guard dataIsValid(bytes: 3) else { break }
@@ -335,12 +346,22 @@ extension Logic {
                 guard dataIsValid(bytes: 5) else { break }
                 
                 let screenObjectNum = Int(data[0])
-                
                 let screenObject = Logic.screenObjects[screenObjectNum]
-                screenObject.moveX = Int(data[1])
-                screenObject.moveY = Int(data[2])
-                screenObject.moveStepSize = Int(data[3])
-                screenObject.moveFlags = Int(data[4])
+                
+                screenObject.moveTo(
+                    moveX: Int(data[1]),
+                    moveY: Int(data[2]),
+                    stepSize: Int(data[3]),
+                    moveFlags: Int(data[4])
+                )
+                
+            case CommandName.operation_step_size:
+                guard dataIsValid(bytes: 2) else { break }
+                
+                let screenObjectNum = Int(data[0])
+                let variableNum = Int(data[1])
+                
+                //Logic.screenObjects[screenObjectNum].stepSize = Int(Logic.variables[variableNum])
               
             // MARK: Unused
             // These operations are using to save memory / time but not needed on modern systems
@@ -356,7 +377,7 @@ extension Logic {
                 supportedOperation = false
             }
             
-            print("\(supportedOperation ? "Process: " : "Unsupported Operation") \(debugPrint(""))")
+            print("\(supportedOperation ? "Process:" : "Unsupported:") \(name) -> \(data)")
             
             return .continueProcessing
         }

@@ -259,6 +259,32 @@ class LogicConditionTests: XCTestCase {
         }
     }
     
+    // Test if an objects position is in the bounding box given by the top-left and bottom-right coords
+    func testCondition_Position_Inside2() throws {
+        
+        if let conditionPosition = Logic.conditionCommands[0x0B]?.copy(),
+           conditionPosition.name == Logic.CommandName.condition_position {
+            
+            // Given
+            let objectNum: UInt8 = 0
+            
+            let object = Logic.screenObjects[Int(objectNum)]
+            object.posX = 74
+            object.posY = 93
+            
+            conditionPosition.data = [objectNum, 74, 92, 75, 93]
+            
+            // When
+            let result = conditionPosition.evaluate()
+            
+            // Then
+            XCTAssertTrue(result)
+            
+        } else {
+            XCTFail()
+        }
+    }
+    
     // Test if an objects position is not in the bounding box given by the top-left and bottom-right coords
     func testCondition_Position_Outside() throws {
         

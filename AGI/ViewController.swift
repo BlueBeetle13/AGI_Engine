@@ -216,6 +216,7 @@ class ViewController: NSViewController,
                 
                 print("Picture Selected: \(pictures[picturesTableView.selectedRow].id)")
                 gameData.drawPicture(id: pictures[picturesTableView.selectedRow].id)
+                gameData.redrawLambda?()
                 
                 // Deselect View
                 self.viewsTableView.deselectAll(nil)
@@ -240,10 +241,13 @@ class ViewController: NSViewController,
                         
                         print("View Selected: \(viewId), \(loopNum), \(cellNum)")
                         let object = ScreenObject()
+                        object.posX = 100
+                        object.posY = 100
                         object.viewId = viewId
                         object.currentLoopNum = loopNum
                         object.currentCellNum = cellNum
                         gameData.drawScreenObject(object)
+                        gameData.redrawLambda?()
                     }
                 }
             }

@@ -28,7 +28,6 @@ class GameData {
     let volumes = Volume()
     var logic: [Int: Logic] = [:]
     var pictures: [Int: Picture] = [:]
-    var views: [Int: View] = [:]
     var words: [Word] = []
     var inventoryItems: [InventoryItem] = []
     var redrawLambda: (() -> Void)? = nil
@@ -44,6 +43,12 @@ class GameData {
     var currentRoomLogic: Logic? = nil
     
     init() {
+        
+        // Init the screen objects
+        for _ in 0 ..< Logic.numScreenObjects {
+            let newObject = ScreenObject()
+            Logic.screenObjects.append(newObject)
+        }
         
         // Rendering
         pictureBuffer = UnsafeMutablePointer<Pixel>.allocate(capacity:GameData.width * GameData.height)
@@ -92,17 +97,36 @@ class GameData {
         if let logic = currentRoomLogic {
             
             // Show game state
-            print("Flags")
+            /*print("Flags")
             for (index, flag) in Logic.flags.enumerated() {
                 print("\(index)) \(flag)")
             }
             print("\nVariables")
             for (index, variable) in Logic.variables.enumerated() {
                 print("\(index)) \(variable)")
+            }*/
+            
+            // Draw the picture
+            if currentPictureNum != -1, let picture = pictures[currentPictureNum] {
+                picture.drawToBuffer(pictureBuffer, priorityBuffer)
             }
             
             Logic.setLogicStepState()
             logic.processLogic(drawGraphics)
+            
+            for (index, object) in Logic.screenObjects.enumerated() {
+                
+                if object.flags[.fAnimated] == true || object.flags[.fUpdate] == true || object.flags[.fDrawn] == true {
+                    print("Draw Object: \(index) - \(object.viewId)")
+                    object.checkMotion()
+                    
+                    object.updatePosition()
+                    
+                    drawScreenObject(object)
+                }
+            }
+            
+            redrawLambda?()
         }
     }
     
@@ -112,18 +136,12 @@ class GameData {
             currentPictureNum = id
             
             picture.drawToBuffer(pictureBuffer, priorityBuffer)
-            
-            redrawLambda?()
         }
     }
     
     func drawScreenObject(_ screenObject: ScreenObject) {
         
-        if currentPictureNum != -1, let picture = pictures[currentPictureNum],
-           let view = views[screenObject.viewId] {
-            
-            // Draw the picture
-            picture.drawToBuffer(pictureBuffer, priorityBuffer)
+        if let view = Logic.views[screenObject.viewId] {
             
             // Draw the view
             view.drawView(pictureBuffer: pictureBuffer,
@@ -132,8 +150,6 @@ class GameData {
                           posY: screenObject.posY,
                           loopNum: screenObject.currentLoopNum,
                           cellNum: screenObject.currentCellNum)
-            
-            redrawLambda?()
         }
     }
 }
